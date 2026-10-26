@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Työ, teho ja hyötysuhde – 8. lk Fysiikan simulaattori</title>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #dbeafe;
+
+      --work-green: #16a34a;
+      --work-green-soft: #dcfce7;
+      --heat-orange: #ea580c;
+      --heat-orange-soft: #ffedd5;
+      --elec-blue: #0284c7;
+      --elec-blue-soft: #e0f2fe;
+      --force-purple: #7c3aed;
+
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.45;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header */
+    header.app-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 16px 22px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-title-group h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-badge {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .header-title-group p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-top: 3px;
+    }
+
+    .formula-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .formula-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      color: #f8fafc;
+    }
+
+    .formula-pill strong {
+      color: #38bdf8;
+      font-family: var(--font-mono);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 1120px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .card-title {
+      font-size: 1.06rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Canvas section */
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      background: #0f172a;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    #simCanvas {
+      display: block;
+      width: 100%;
+      height: 430px;
+    }
+
+    .canvas-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 9px 15px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: #ffffff;
+    }
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-success {
+      background: var(--work-green);
+      color: #ffffff;
+    }
+    .btn-success:hover {
+      background: #15803d;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .btn-sm.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Mode Selector Tabs */
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--bg-subtle);
+      padding: 5px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      margin-bottom: 14px;
+    }
+
+    .mode-tab {
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      border: none;
+    }
+
+    .mode-tab.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Sliders and Controls */
+    .controls-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .control-item {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+    }
+
+    .control-item.disabled-control {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .control-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .control-label {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .control-sub {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-left: 4px;
+      font-weight: 400;
+    }
+
+    .control-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary);
+      background: var(--primary-soft);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    /* Live Meters Grid */
+    .meters-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .meters-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .meter-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 9px 11px;
+    }
+
+    .meter-box.green { border-left-color: var(--work-green); }
+    .meter-box.orange { border-left-color: var(--heat-orange); }
+    .meter-box.blue { border-left-color: var(--elec-blue); }
+    .meter-box.purple { border-left-color: var(--force-purple); }
+
+    .meter-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .meter-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .meter-sub {
+      font-size: 0.74rem;
+      color: var(--text-light);
+    }
+
+    /* Sankey & Energy Section */
+    .sankey-container {
+      background: #0f172a;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      border: 1px solid #334155;
+      margin-bottom: 14px;
+    }
+
+    #sankeySvg {
+      width: 100%;
+      height: 205px;
+      display: block;
+    }
+
+    .energy-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .eb-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .eb-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .eb-track {
+      height: 16px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .eb-fill {
+      height: 100%;
+      transition: width 0.06s linear;
+      border-radius: 999px;
+    }
+
+    .formula-live-box {
+      margin-top: 14px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .formula-math {
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      color: var(--text-main);
+    }
+
+    .eff-badge-big {
+      font-family: var(--font-mono);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--work-green);
+      background: var(--work-green-soft);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #86efac;
+    }
+
+    /* Bottom Dual Grid: Comparison & Table */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 1120px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .compare-col {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .compare-col h4 {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .compare-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px dashed var(--border-light);
+      font-size: 0.85rem;
+    }
+
+    .compare-row:last-child {
+      border-bottom: none;
+    }
+
+    .compare-highlight {
+      background: var(--work-green-soft);
+      border: 1px solid #86efac;
+      color: #14532d;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      margin-top: 12px;
+    }
+
+    /* Data Table */
+    .table-scroll {
+      overflow-x: auto;
+      max-height: 290px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2) {
+      text-align: left;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .empty-row td {
+      text-align: center !important;
+      color: var(--text-light);
+      padding: 24px;
+      font-style: italic;
+    }
+
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toast-msg {
+      font-size: 0.8rem;
+      color: var(--work-green);
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .toast-msg.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- YLÄTUNNISTE JA KAAVAT -->
+    <header class="app-header">
+      <div class="header-title-group">
+        <h1>
+          ⚙️ Työ, teho ja hyötysuhde
+          <span class="header-badge">8. lk Fysiikka</span>
+        </h1>
+        <p>Mekaaninen nosto- ja vetotyö, teho energian muuttumisnopeutena sekä koneiston hyötysuhde ja hukkalämpö</p>
+      </div>
+      <div class="formula-bar">
+        <div class="formula-pill">Työ: <strong>W = F · s</strong></div>
+        <div class="formula-pill">Nostotyö: <strong>W = G · h = mgh</strong></div>
+        <div class="formula-pill">Teho: <strong>P = W / t</strong></div>
+        <div class="formula-pill">Hyötysuhde: <strong>η = W<sub>hyöty</sub> / E<sub>otto</sub></strong></div>
+      </div>
+    </header>
+
+    <!-- PÄÄALUE: VASEN (SIMULAATIO + SANKEY) | OIKEA (OHJAUSPANEELI) -->
+    <div class="main-grid">
+      <!-- VASEN SARAKE: INTERAKTIIVINEN KANGAS JA MITTARIT -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🏗️ Sähkövinssin simulaatio</span>
+          </div>
+          <div class="btn-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="chkVectors" checked />
+              Näytä voimavektorit (F, G, F<sub>μ</sub>)
+            </label>
+            <span style="color:var(--border)">|</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Nopeutus:</span>
+            <button type="button" class="btn-secondary btn-sm speed-btn active" data-speed="1">1×</button>
+            <button type="button" class="btn-secondary btn-sm speed-btn" data-speed="2">2×</button>
+            <button type="button" class="btn-secondary btn-sm speed-btn" data-speed="5">5×</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="simCanvas" width="820" height="430"></canvas>
+        </div>
+
+        <div class="canvas-toolbar">
+          <div class="btn-group">
+            <button type="button" id="btnStart" class="btn-primary">▶ Käynnistä nosto</button>
+            <button type="button" id="btnPause" class="btn-warning">⏸ Pysäytä</button>
+            <button type="button" id="btnReset" class="btn-secondary">↺ Palauta alkuun</button>
+          </div>
+          <div class="btn-group">
+            <button type="button" id="btnRecord" class="btn-success">＋ Tallenna mittauspiste taulukkoon</button>
+          </div>
+        </div>
+
+        <!-- REAALIAIKAISET MITTARIT -->
+        <div class="meters-grid">
+          <div class="meter-box purple">
+            <div class="meter-label" id="lblForceTitle">Tarvittava nostovoima F</div>
+            <div class="meter-val" id="valForce">196,0 N</div>
+            <div class="meter-sub" id="subForceFormula">F = G = m · g (g = 9,8 m/s²)</div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-label">Aika t / Kokonaisaika</div>
+            <div class="meter-val" id="valTime">0,00 s / 3,92 s</div>
+            <div class="meter-sub" id="valSpeed">Nopeus v = 0,77 m/s</div>
+          </div>
+          <div class="meter-box green">
+            <div class="meter-label">Tehty hyötytyö W<sub>hyöty</sub></div>
+            <div class="meter-val" id="valWorkNow">0 J</div>
+            <div class="meter-sub" id="valWorkTarget">Tavoite maaliin: 588 J</div>
+          </div>
+          <div class="meter-box blue">
+            <div class="meter-label">Käytetty sähköenergia E<sub>otto</sub></div>
+            <div class="meter-val" id="valElecNow">0 J</div>
+            <div class="meter-sub" id="valElecTarget">Ottoteho P<sub>otto</sub> = 250 W</div>
+          </div>
+          <div class="meter-box green">
+            <div class="meter-label">Mekaaninen hyötyteho P<sub>anto</sub></div>
+            <div class="meter-val" id="valPowerOut">150,0 W</div>
+            <div class="meter-sub">P<sub>anto</sub> = η · P<sub>otto</sub> = W<sub>hyöty</sub> / t</div>
+          </div>
+          <div class="meter-box orange">
+            <div class="meter-label">Hukkalämpö E<sub>hukka</sub></div>
+            <div class="meter-val" id="valHeatNow">0 J</div>
+            <div class="meter-sub" id="valHeatPower">Lämpöteho P<sub>hukka</sub> = 100,0 W</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OIKEA SARAKE: SÄÄTIMET + SANKEY-ENERGIAVIRTA -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- OHJAUSPANEELI -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎛️ Ohjauspaneeli ja suureiden säätö</div>
+          </div>
+
+          <div class="mode-tabs" role="tablist">
+            <button type="button" class="mode-tab active" id="tabVertical">⬆️ Pystynosto (nostotyö)</button>
+            <button type="button" class="mode-tab" id="tabHorizontal">➡️ Vaakaveto (kitkatyö)</button>
+          </div>
+
+          <div class="controls-stack">
+            <!-- Massa m -->
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Kuorman massa (m)</span>
+                  <span class="control-sub" id="massWeightHint">Paino G = 196,0 N</span>
+                </div>
+                <span class="control-value" id="lblMass">20 kg</span>
+              </div>
+              <input type="range" id="rngMass" min="1" max="200" step="1" value="20" />
+            </div>
+
+            <!-- Matka / Korkeus -->
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label" id="lblDistTitle">Nostokorkeus (h)</span>
+                  <span class="control-sub">Tavoitematka (1 – 10 m)</span>
+                </div>
+                <span class="control-value" id="lblDist">3,0 m</span>
+              </div>
+              <input type="range" id="rngDist" min="1" max="10" step="0.5" value="3.0" />
+            </div>
+
+            <!-- Kitkakerroin (vain vaakavedossa) -->
+            <div class="control-item disabled-control" id="ctrlFriction">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Alustan kitkakerroin (μ)</span>
+                  <span class="control-sub" id="lblSurfaceDesc">Keskitason kitka (puu / lattia)</span>
+                </div>
+                <span class="control-value" id="lblFriction">0,40</span>
+              </div>
+              <input type="range" id="rngFriction" min="0.1" max="0.8" step="0.05" value="0.40" />
+            </div>
+
+            <!-- Moottorin ottoteho -->
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Moottorin ottoteho (P<sub>otto</sub>)</span>
+                  <span class="control-sub">Sähköverkosta otettu teho</span>
+                </div>
+                <span class="control-value" id="lblPower">250 W</span>
+              </div>
+              <input type="range" id="rngPower" min="20" max="2000" step="10" value="250" />
+              <div class="preset-row">
+                <button type="button" class="btn-secondary btn-sm power-preset" data-p="50">Pieni teho (50 W)</button>
+                <button type="button" class="btn-secondary btn-sm power-preset active" data-p="250">Keskiteho (250 W)</button>
+                <button type="button" class="btn-secondary btn-sm power-preset" data-p="1000">Suuri teho (1000 W)</button>
+              </div>
+            </div>
+
+            <!-- Hyötysuhde -->
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Koneiston laatu / Hyötysuhde (η)</span>
+                  <span class="control-sub" id="lblQualityHint">Tyypillinen sähkövinssi (hukkalämpö 40 %)</span>
+                </div>
+                <span class="control-value" id="lblEff">60 %</span>
+              </div>
+              <input type="range" id="rngEff" min="10" max="100" step="5" value="60" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ENERGIAN JA TEHON VUOKAAVIO (SANKEY) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚡ Energian ja tehon jakautuminen (Sankey-vuokaavio)</div>
+          </div>
+
+          <div class="sankey-container">
+            <svg id="sankeySvg" viewBox="0 0 560 205" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+
+          <div class="energy-bars">
+            <div class="eb-row">
+              <div class="eb-top">
+                <span style="color:var(--elec-blue)">Syötetty sähköenergia E<sub>otto</sub> (100 %)</span>
+                <span id="barElecText" style="font-family:var(--font-mono)">0 J / 980 J</span>
+              </div>
+              <div class="eb-track">
+                <div class="eb-fill" id="barElecFill" style="width:0%; background:var(--elec-blue);"></div>
+              </div>
+            </div>
+
+            <div class="eb-row">
+              <div class="eb-top">
+                <span style="color:var(--work-green)">Mekaaninen hyötytyö W<sub>hyöty</sub> (<span id="barWorkPct">60</span> %)</span>
+                <span id="barWorkText" style="font-family:var(--font-mono)">0 J / 588 J</span>
+              </div>
+              <div class="eb-track">
+                <div class="eb-fill" id="barWorkFill" style="width:0%; background:var(--work-green);"></div>
+              </div>
+            </div>
+
+            <div class="eb-row">
+              <div class="eb-top">
+                <span style="color:var(--heat-orange)">Moottorin ja vaihteiston hukkalämpö E<sub>hukka</sub> (<span id="barHeatPct">40</span> %)</span>
+                <span id="barHeatText" style="font-family:var(--font-mono)">0 J / 392 J</span>
+              </div>
+              <div class="eb-track">
+                <div class="eb-fill" id="barHeatFill" style="width:0%; background:var(--heat-orange);"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="formula-live-box">
+            <div class="formula-math" id="liveEffEquation">
+              η = W<sub>hyöty</sub> / E<sub>otto</sub> = 588 J / 980 J = 0,60
+            </div>
+            <div class="eff-badge-big" id="liveEffBadge">η = 60 %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALAPANEELI: PEDAGOGINEN VERTAILUTYÖKALU & MITTAUSTAULUKKO -->
+    <div class="bottom-grid">
+      <!-- D. PEDAGOGINEN VERTAILUTYÖKALU -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚖️ Vertaa kahta suoritusta: "Sama työ – eri aika ja teho"</div>
+          <button type="button" id="btnDemoCompare" class="btn-primary btn-sm">
+            ⚡ Lataa esimerkkivertailu (100 W vs. 500 W)
+          </button>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+          Nostaako tehokkaampi moottori kuorman tekemällä <em>enemmän työtä</em>? Tallenna kaksi eri teholla tehtyä ajoa ja vertaa tuloksia!
+        </p>
+
+        <div class="btn-group" style="margin-bottom:8px;">
+          <button type="button" id="btnSaveA" class="btn-secondary btn-sm">📌 Tallenna nykyinen Testiksi A</button>
+          <button type="button" id="btnSaveB" class="btn-secondary btn-sm">📌 Tallenna nykyinen Testiksi B</button>
+        </div>
+
+        <div class="compare-grid">
+          <div class="compare-col" id="compBoxA"></div>
+          <div class="compare-col" id="compBoxB"></div>
+        </div>
+
+        <div class="compare-highlight" id="compareSummary"></div>
+      </div>
+
+      <!-- E. MITTAUSTAULUKKO JA TIEDONKERUU -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Kokeellinen mittaustaulukko</div>
+          <div class="btn-group">
+            <span id="copyToast" class="toast-msg">✓ Kopioitu leikepöydälle!</span>
+            <button type="button" id="btnCopyCsv" class="btn-secondary btn-sm">📋 Kopioi CSV (Taulukkolaskentaan)</button>
+            <button type="button" id="btnClearTable" class="btn-secondary btn-sm">🗑️ Tyhjennä</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tila</th>
+                <th>Massa (kg)</th>
+                <th>Voima (N)</th>
+                <th>Matka (m)</th>
+                <th>Aika (s)</th>
+                <th>Hyötytyö W (J)</th>
+                <th>Ottoteho (W)</th>
+                <th>Hyötyteho (W)</th>
+                <th>Hyötysuhde (%)</th>
+              </tr>
+            </thead>
+            <tbody id="dataTableBody">
+              <tr class="empty-row">
+                <td colspan="10">Ei tallennettuja mittauksia. Käynnistä nosto tai tallenna mittauspiste painikkeesta.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Fysiikan vakiot
+      const G_ACCEL = 9.8; // m/s^2
+
+      // Sovelluksen tila
+      const state = {
+        mode: "vertical",       // 'vertical' | 'horizontal'
+        mass: 20,               // kg (1 - 200)
+        distance: 3.0,          // m (1 - 10)
+        friction: 0.40,         // mu (0.1 - 0.8)
+        powerIn: 250,           // W (20 - 2000)
+        efficiency: 60,         // % (10 - 100)
+
+        // Simulaation dynaamiset muuttujat
+        running: false,
+        finished: false,
+        timeScale: 1,
+        showVectors: true,
+        elapsedTime: 0,         // s
+        currentPos: 0,          // m
+        drumAngle: 0,           // rad
+        lastFrameTime: 0,
+
+        // Partikkelit (hukkalämpö moottorista ja kitkalämpö)
+        heatParticles: [],
+        frictionSparks: [],
+
+        // Vertailutyökalun tallenteet A ja B
+        testA: {
+          mode: "vertical",
+          mass: 20,
+          distance: 3.0,
+          friction: 0.40,
+          powerIn: 100,
+          efficiency: 60
+        },
+        testB: {
+          mode: "vertical",
+          mass: 20,
+          distance: 3.0,
+          friction: 0.40,
+          powerIn: 500,
+          efficiency: 60
+        },
+
+        // Mittaustaulukon rivit
+        measurements: []
+      };
+
+      // DOM-elementit
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+      const sankeySvg = document.getElementById("sankeySvg");
+
+      const tabVertical = document.getElementById("tabVertical");
+      const tabHorizontal = document.getElementById("tabHorizontal");
+      const rngMass = document.getElementById("rngMass");
+      const rngDist = document.getElementById("rngDist");
+      const rngFriction = document.getElementById("rngFriction");
+      const rngPower = document.getElementById("rngPower");
+      const rngEff = document.getElementById("rngEff");
+      const ctrlFriction = document.getElementById("ctrlFriction");
+
+      const btnStart = document.getElementById("btnStart");
+      const btnPause = document.getElementById("btnPause");
+      const btnReset = document.getElementById("btnReset");
+      const btnRecord = document.getElementById("btnRecord");
+      const chkVectors = document.getElementById("chkVectors");
+
+      // Suomalainen numeromuotoilu
+      function fmt(num, decimals = 1) {
+        return Number(num).toFixed(decimals).replace(".", ",");
+      }
+
+      // Laskee kaikki fysiikan suureet annetuille parametreille
+      function computePhysics(params) {
+        const m = params.mass;
+        const s = params.distance;
+        const mu = params.friction;
+        const pIn = params.powerIn;
+        const eta = params.efficiency / 100;
+
+        const weightG = m * G_ACCEL;
+        const force = params.mode === "vertical" ? weightG : mu * weightG;
+        const usefulWork = force * s;              // W_hyöty (J)
+        const powerOut = pIn * eta;                // P_anto (W)
+        const powerWaste = pIn - powerOut;         // P_hukka (W)
+        const velocity = powerOut / force;         // v (m/s)
+        const totalTime = usefulWork / powerOut;   // t (s)
+        const totalElecEnergy = pIn * totalTime;   // E_otto (J)
+        const totalWasteHeat = totalElecEnergy - usefulWork; // E_hukka (J)
+
+        return {
+          weightG,
+          force,
+          usefulWork,
+          powerIn: pIn,
+          powerOut,
+          powerWaste,
+          velocity,
+          totalTime,
+          totalElecEnergy,
+          totalWasteHeat,
+          eta,
+          efficiencyPct: params.efficiency
+        };
+      }
+
+      // Päivittää käyttöliittymän tekstit, mittarit ja Sankey-kaavion
+      function updateUI() {
+        const phys = computePhysics(state);
+
+        // Säätimien arvotekstit
+        document.getElementById("lblMass").textContent = `${state.mass} kg`;
+        document.getElementById("massWeightHint").textContent = `Paino G = ${fmt(phys.weightG, 1)} N`;
+
+        document.getElementById("lblDistTitle").textContent =
+          state.mode === "vertical" ? "Nostokorkeus (h)" : "Vetomatka (s)";
+        document.getElementById("lblDist").textContent = `${fmt(state.distance, 1)} m`;
+
+        document.getElementById("lblFriction").textContent = fmt(state.friction, 2);
+        let surfText = "Keskitason kitka (puu / lattia)";
+        if (state.friction <= 0.2) surfText = "Liukas alusta (jää / voideltu teräs)";
+        else if (state.friction >= 0.6) surfText = "Karkea alusta (kumi / karkea asfaltti)";
+        document.getElementById("lblSurfaceDesc").textContent = surfText;
+
+        document.getElementById("lblPower").textContent = `${state.powerIn} W`;
+        document.getElementById("lblEff").textContent = `${state.efficiency} %`;
+
+        let qualHint = `Hukkalämpöosuus ${100 - state.efficiency} %`;
+        if (state.efficiency === 100) qualHint = "Ihanteellinen häviötön kone (0 % hukkalämpöä)";
+        else if (state.efficiency <= 35) qualHint = "Heikko hyötysuhde (kuumenee voimakkaasti)";
+        document.getElementById("lblQualityHint").textContent = qualHint;
+
+        // Kitkasäätimen aktiivisuus
+        if (state.mode === "horizontal") {
+          ctrlFriction.classList.remove("disabled-control");
+        } else {
+          ctrlFriction.classList.add("disabled-control");
+        }
+
+        // Tehon pikavalintapainikkeiden korostus
+        document.querySelectorAll(".power-preset").forEach((btn) => {
+          btn.classList.toggle("active", Number(btn.dataset.p) === state.powerIn);
+        });
+
+        // Käynnistyspainikkeen teksti
+        const actionWord = state.mode === "vertical" ? "nosto" : "veto";
+        if (state.running) {
+          btnStart.textContent = `▶ Käynnissä (${actionWord})...`;
+        } else if (state.finished) {
+          btnStart.textContent = `▶ Toista ${actionWord} alusta`;
+        } else if (state.elapsedTime > 0) {
+          btnStart.textContent = `▶ Jatka ${actionWord}a`;
+        } else {
+          btnStart.textContent = `▶ Käynnistä ${actionWord}`;
+        }
+
+        // Hetkellinen eteneminen (0 ... 1)
+        const progress = phys.totalTime > 0 ? Math.min(1, state.elapsedTime / phys.totalTime) : 0;
+        const workNow = phys.usefulWork * progress;
+        const elecNow = phys.totalElecEnergy * progress;
+        const heatNow = phys.totalWasteHeat * progress;
+
+        // Mittaritaulu
+        document.getElementById("lblForceTitle").textContent =
+          state.mode === "vertical" ? "Tarvittava nostovoima F" : "Voitettava kitkavoima Fμ";
+        document.getElementById("valForce").textContent = `${fmt(phys.force, 1)} N`;
+        document.getElementById("subForceFormula").textContent =
+          state.mode === "vertical"
+            ? `F = G = m · g (${state.mass} kg · 9,8 m/s²)`
+            : `Fμ = μ · m · g (${fmt(state.friction, 2)} · ${ fmt(phys.weightG, 1) } N)`;
+
+        document.getElementById("valTime").textContent =
+          `${fmt(state.elapsedTime, 2)} s / ${fmt(phys.totalTime, 2)} s`;
+        document.getElementById("valSpeed").textContent =
+          `Tasainen nopeus v = ${fmt(phys.velocity, 2)} m/s`;
+
+        document.getElementById("valWorkNow").textContent = `${fmt(workNow, 0)} J`;
+        document.getElementById("valWorkTarget").textContent =
+          `Kokonaisnostotyö: ${fmt(phys.usefulWork, 0)} J`;
+
+        document.getElementById("valElecNow").textContent = `${fmt(elecNow, 0)} J`;
+        document.getElementById("valElecTarget").textContent =
+          `Maalissa yhteensä: ${fmt(phys.totalElecEnergy, 0)} J`;
+
+        document.getElementById("valPowerOut").textContent = `${fmt(phys.powerOut, 1)} W`;
+        document.getElementById("valHeatNow").textContent = `${fmt(heatNow, 0)} J`;
+        document.getElementById("valHeatPower").textContent =
+          `Lämpöteho Phukka = ${fmt(phys.powerWaste, 1)} W`;
+
+        // Energiapalkit
+        const displayProgress = state.elapsedTime === 0 && !state.running ? 1 : progress;
+        const barElecVal = state.elapsedTime === 0 && !state.running ? phys.totalElecEnergy : elecNow;
+        const barWorkVal = state.elapsedTime === 0 && !state.running ? phys.usefulWork : workNow;
+        const barHeatVal = state.elapsedTime === 0 && !state.running ? phys.totalWasteHeat : heatNow;
+
+        document.getElementById("barWorkPct").textContent = state.efficiency;
+        document.getElementById("barHeatPct").textContent = 100 - state.efficiency;
+
+        document.getElementById("barElecText").textContent =
+          `${fmt(barElecVal, 0)} J / ${fmt(phys.totalElecEnergy, 0)} J`;
+        document.getElementById("barWorkText").textContent =
+          `${fmt(barWorkVal, 0)} J / ${fmt(phys.usefulWork, 0)} J`;
+        document.getElementById("barHeatText").textContent =
+          `${fmt(barHeatVal, 0)} J / ${fmt(phys.totalWasteHeat, 0)} J`;
+
+        document.getElementById("barElecFill").style.width = `${displayProgress * 100}%`;
+        document.getElementById("barWorkFill").style.width = `${displayProgress * state.efficiency}%`;
+        document.getElementById("barHeatFill").style.width = `${displayProgress * (100 - state.efficiency)}%`;
+
+        // Hyötysuhdekaava
+        document.getElementById("liveEffEquation").innerHTML =
+          `η = W<sub>hyöty</sub> / E<sub>otto</sub> = ${fmt(phys.usefulWork, 0)} J / ${fmt(phys.totalElecEnergy, 0)} J = ${fmt(phys.eta, 2)}`;
+        document.getElementById("liveEffBadge").textContent = `η = ${state.efficiency} %`;
+
+        renderSankey(phys);
+      }
+
+      // Piirtää dynaamisen Sankey-vuokaavion SVG:hen
+      function renderSankey(phys) {
+        const totalH = 96;
+        const usefulH = Math.max(4, totalH * phys.eta);
+        const wasteH = Math.max(0, totalH - usefulH);
+
+        const startX = 120;
+        const endX = 415;
+        const trunkTop = 54;
+        const trunkMid = trunkTop + usefulH;
+        const trunkBot = trunkTop + totalH;
+
+        const usefulTargetTop = 26;
+        const usefulTargetBot = usefulTargetTop + usefulH;
+
+        const wasteTargetBot = 182;
+        const wasteTargetTop = wasteTargetBot - wasteH;
+
+        const cX1 = startX + 125;
+        const cX2 = endX - 125;
+
+        const usefulPath = `
+          M ${startX} ${trunkTop}
+          C ${cX1} ${trunkTop}, ${cX2} ${usefulTargetTop}, ${endX} ${usefulTargetTop}
+          L ${endX} ${usefulTargetBot}
+          C ${cX2} ${usefulTargetBot}, ${cX1} ${trunkMid}, ${startX} ${trunkMid}
+          Z
+        `;
+
+        const wastePath = wasteH > 0.5 ? `
+          M ${startX} ${trunkMid}
+          C ${cX1} ${trunkMid}, ${cX2} ${wasteTargetTop}, ${endX} ${wasteTargetTop}
+          L ${endX} ${wasteTargetBot}
+          C ${cX2} ${wasteTargetBot}, ${cX1} ${trunkBot}, ${startX} ${trunkBot}
+          Z
+        ` : "";
+
+        sankeySvg.innerHTML = `
+          <defs>
+            <linearGradient id="gradInput" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0284c7" />
+              <stop offset="100%" stop-color="#38bdf8" />
+            </linearGradient>
+            <linearGradient id="gradUseful" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="35%" stop-color="#22c55e" />
+              <stop offset="100%" stop-color="#16a34a" />
+            </linearGradient>
+            <linearGradient id="gradWaste" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="35%" stop-color="#f97316" />
+              <stop offset="100%" stop-color="#ea580c" />
+            </linearGradient>
+          </defs>
+
+          <!-- Syöttörunko -->
+          <rect x="14" y="${trunkTop}" width="${startX - 14}" height="${totalH}" rx="4" fill="url(#gradInput)" />
+
+          <!-- Hyötyhaara -->
+          <path d="${usefulPath}" fill="url(#gradUseful)" opacity="0.95" />
+
+          <!-- Hukkahaara -->
+          ${wastePath ? `<path d="${wastePath}" fill="url(#gradWaste)" opacity="0.92" />` : ""}
+
+          <!-- Vasemman puolen tekstit (Sähköenergia) -->
+          <text x="22" y="${trunkTop - 16}" fill="#7dd3fc" font-size="12" font-weight="700" font-family="sans-serif">
+            SÄHKÖVERKKO (100 %)
+          </text>
+          <text x="22" y="${trunkTop + totalH / 2 - 4}" fill="#ffffff" font-size="13" font-weight="800" font-family="monospace">
+            P_otto = ${phys.powerIn} W
+          </text>
+          <text x="22" y="${trunkTop + totalH / 2 + 14}" fill="#e0f2fe" font-size="12" font-weight="700" font-family="monospace">
+            E_otto = ${fmt(phys.totalElecEnergy, 0)} J
+          </text>
+
+          <!-- Oikea ylähaara (Hyötytyö) -->
+          <text x="${endX + 10}" y="${usefulTargetTop + Math.max(14, usefulH / 2 - 8)}" fill="#4ade80" font-size="12.5" font-weight="800" font-family="sans-serif">
+            HYÖTYTYÖ (${phys.efficiencyPct} %)
+          </text>
+          <text x="${endX + 10}" y="${usefulTargetTop + Math.max(14, usefulH / 2 - 8) + 16}" fill="#ffffff" font-size="12" font-weight="700" font-family="monospace">
+            P_anto = ${fmt(phys.powerOut, 1)} W
+          </text>
+          <text x="${endX + 10}" y="${usefulTargetTop + Math.max(14, usefulH / 2 - 8) + 31}" fill="#bbf7d0" font-size="12" font-weight="700" font-family="monospace">
+            W_hyöty = ${fmt(phys.usefulWork, 0)} J
+          </text>
+
+          <!-- Oikea alahaara (Hukkalämpö) -->
+          ${
+            phys.efficiencyPct < 100
+              ? `
+            <text x="${endX + 10}" y="${wasteTargetBot - Math.max(28, wasteH / 2 + 4)}" fill="#fb923c" font-size="12.5" font-weight="800" font-family="sans-serif">
+              HUKKALÄMPÖ (${100 - phys.efficiencyPct} %)
+            </text>
+            <text x="${endX + 10}" y="${wasteTargetBot - Math.max(28, wasteH / 2 + 4) + 16}" fill="#ffffff" font-size="12" font-weight="700" font-family="monospace">
+              P_hukka = ${fmt(phys.powerWaste, 1)} W
+            </text>
+            <text x="${endX + 10}" y="${wasteTargetBot - Math.max(28, wasteH / 2 + 4) + 31}" fill="#fed7aa" font-size="12" font-weight="700" font-family="monospace">
+              E_hukka = ${fmt(phys.totalWasteHeat, 0)} J
+            </text>
+          `
+              : `
+            <text x="${endX + 10}" y="165" fill="#94a3b8" font-size="12" font-family="sans-serif">
+              Ei energiahäviöitä (η = 100 %)
+            </text>
+          `
+          }
+        `;
+      }
+
+      // Piirtää nuolen Canvas-kankaalle (tukee textSide-parametria: 'left', 'right', 'bottom', 'top', 'auto')
+      function drawArrow(x1, y1, x2, y2, color, label, subLabel, textSide = "auto") {
+        const headLen = 11;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3.5;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        if (label) {
+          ctx.font = "bold 12px system-ui, sans-serif";
+          const textW = Math.max(
+            ctx.measureText(label).width,
+            subLabel ? ctx.measureText(subLabel).width : 0
+          );
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          const isVertical = Math.abs(y2 - y1) > Math.abs(x2 - x1);
+
+          let offsetX, offsetY;
+          if (isVertical) {
+            // Jos textSide on 'left', teksti sijoitetaan nuolilinjan vasemmalle puolelle
+            if (textSide === "left") {
+              offsetX = -textW - 14;
+            } else {
+              offsetX = 14;
+            }
+            offsetY = 4;
+          } else {
+            offsetX = -textW / 2;
+            offsetY = textSide === "bottom" ? 22 : -12;
+          }
+
+          ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+          ctx.fillRect(midX + offsetX - 4, midY + offsetY - 13, textW + 8, subLabel ? 30 : 18);
+          ctx.fillStyle = color;
+          ctx.fillText(label, midX + offsetX, midY + offsetY);
+          if (subLabel) {
+            ctx.fillStyle = "#e2e8f0";
+            ctx.font = "11px monospace";
+            ctx.fillText(subLabel, midX + offsetX, midY + offsetY + 13);
+          }
+        }
+        ctx.restore();
+      }
+
+      // Piirtää moottoriyksikön ja sen lämpenemisen
+      function drawMotorUnit(x, y, phys, progress) {
+        ctx.save();
+
+        // Hukkalämmön suhteellinen hehku (0 ... 1)
+        const heatRatio = (1 - phys.eta) * (state.running || state.finished ? Math.min(1, 0.35 + progress * 0.65) : 0.2);
+
+        if (heatRatio > 0.05) {
+          const grad = ctx.createRadialGradient(x, y, 10, x, y, 68);
+          grad.addColorStop(0, `rgba(249, 115, 22, ${0.55 * heatRatio})`);
+          grad.addColorStop(1, "rgba(249, 115, 22, 0)");
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(x, y, 68, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Moottorin runko
+        const r = Math.round(30 + 190 * heatRatio);
+        const g = Math.round(58 - 10 * heatRatio);
+        const b = Math.round(95 - 70 * heatRatio);
+        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.roundRect(x - 42, y - 30, 84, 60, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // Jäähdytysrivat
+        ctx.strokeStyle = "rgba(255,255,255,0.22)";
+        ctx.lineWidth = 2;
+        for (let i = -20; i <= 20; i += 8) {
+          ctx.beginPath();
+          ctx.moveTo(x - 36, y + i);
+          ctx.lineTo(x + 10, y + i);
+          ctx.stroke();
+        }
+
+        // Pyörivä vinssikela
+        const drumX = x + 20;
+        const drumY = y;
+        ctx.fillStyle = "#1e293b";
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(drumX, drumY, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Kelan puolat
+        ctx.strokeStyle = "#38bdf8";
+        for (let i = 0; i < 3; i++) {
+          const a = state.drumAngle + (i * Math.PI) / 1.5;
+          ctx.beginPath();
+          ctx.moveTo(drumX - Math.cos(a) * 14, drumY - Math.sin(a) * 14);
+          ctx.lineTo(drumX + Math.cos(a) * 14, drumY + Math.sin(a) * 14);
+          ctx.stroke();
+        }
+
+        // Lämpömittari moottorin kyljessä
+        const thX = x - 56;
+        const thY = y - 24;
+        const thH = 48;
+        ctx.fillStyle = "#0f172a";
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(thX - 5, thY, 10, thH, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        const tempRise = ((1 - phys.eta) * 65 * progress) + (1 - phys.eta) * 12;
+        const fillFrac = Math.min(1, (20 + tempRise) / 100);
+        ctx.fillStyle = fillFrac > 0.45 ? "#ef4444" : "#f97316";
+        ctx.fillRect(thX - 3, thY + thH * (1 - fillFrac), 6, thH * fillFrac);
+
+        ctx.beginPath();
+        ctx.arc(thX, thY + thH + 3, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Moottorin nimikilpi
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.fillText(`Sähkömoottori ${phys.powerIn} W`, x - 42, y - 37);
+
+        ctx.restore();
+      }
+
+      // Päivittää ja piirtää hukkalämpöpartikkelit
+      function updateAndDrawParticles(dt, motorX, motorY, crateX, crateY, phys) {
+        // Moottorin lämpöpartikkelit
+        if (state.running && phys.powerWaste > 0) {
+          const spawnChance = Math.min(0.95, (phys.powerWaste / 250) * 0.45);
+          if (Math.random() < spawnChance) {
+            state.heatParticles.push({
+              x: motorX - 25 + Math.random() * 50,
+              y: motorY - 25,
+              vx: (Math.random() - 0.5) * 18,
+              vy: -28 - Math.random() * 25,
+              r: 4 + Math.random() * 6,
+              alpha: 0.75
+            });
+          }
+        }
+
+        for (let i = state.heatParticles.length - 1; i >= 0; i--) {
+          const p = state.heatParticles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.r += 8 * dt;
+          p.alpha -= 0.55 * dt;
+          if (p.alpha <= 0) {
+            state.heatParticles.splice(i, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.fillStyle = `rgba(251, 146, 60, ${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Kitkalämpöpartikkelit vaakavedossa
+        if (state.running && state.mode === "horizontal") {
+          if (Math.random() < state.friction * 0.85) {
+            state.frictionSparks.push({
+              x: crateX - 18 + Math.random() * 36,
+              y: crateY,
+              vx: -25 - Math.random() * 35,
+              vy: -10 - Math.random() * 25,
+              alpha: 0.9
+            });
+          }
+        }
+
+        for (let i = state.frictionSparks.length - 1; i >= 0; i--) {
+          const sp = state.frictionSparks[i];
+          sp.x += sp.vx * dt;
+          sp.y += sp.vy * dt;
+          sp.alpha -= 1.4 * dt;
+          if (sp.alpha <= 0) {
+            state.frictionSparks.splice(i, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.fillStyle = `rgba(251, 191, 36, ${sp.alpha})`;
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, 2.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Piirtää koko simulaatiokankaan
+      function renderCanvas(dt) {
+        const W = canvas.width;
+        const H = canvas.height;
+        const phys = computePhysics(state);
+        const progress = phys.totalTime > 0 ? Math.min(1, state.elapsedTime / phys.totalTime) : 0;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Taustagradientti ja ruudukko
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, "#0f172a");
+        bgGrad.addColorStop(1, "#1e293b");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.08)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, H);
+          ctx.stroke();
+        }
+        for (let y = 0; y < H; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(W, y);
+          ctx.stroke();
+        }
+
+        if (state.mode === "vertical") {
+          // --- PYSTYNOSTO ---
+          const groundY = 375;
+          const topY = 95;
+          const meterPx = (groundY - topY) / 10; // 10 metriä = 280 px (28 px/m)
+          const towerX = 160;
+          const hoistX = 330;
+          const motorX = 215;
+          const motorY = 62;
+
+          // Maaperä
+          ctx.fillStyle = "#334155";
+          ctx.fillRect(0, groundY, W, H - groundY);
+          ctx.strokeStyle = "#64748b";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, groundY);
+          ctx.lineTo(W, groundY);
+          ctx.stroke();
+
+          // Nosturin ristikkotorni
+          ctx.strokeStyle = "#475569";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(towerX - 22, 42, 44, groundY - 42);
+          ctx.beginPath();
+          ctx.moveTo(towerX - 22, 42);
+          ctx.lineTo(hoistX + 40, 42);
+          ctx.lineTo(hoistX + 40, 74);
+          ctx.lineTo(towerX - 22, 74);
+          ctx.stroke();
+
+          // Ristikot
+          ctx.lineWidth = 1.8;
+          for (let y = 74; y < groundY - 25; y += 36) {
+            ctx.beginPath();
+            ctx.moveTo(towerX - 22, y);
+            ctx.lineTo(towerX + 22, y + 36);
+            ctx.moveTo(towerX + 22, y);
+            ctx.lineTo(towerX - 22, y + 36);
+            ctx.stroke();
+          }
+
+          // Korkeusasteikko (0 - 10 m)
+          const scaleX = 95;
+          ctx.strokeStyle = "#94a3b8";
+          ctx.fillStyle = "#cbd5e1";
+          ctx.font = "11px monospace";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(scaleX, topY);
+          ctx.lineTo(scaleX, groundY);
+          ctx.stroke();
+
+          for (let m = 0; m <= 10; m++) {
+            const y = groundY - m * meterPx;
+            ctx.beginPath();
+            ctx.moveTo(scaleX - 6, y);
+            ctx.lineTo(scaleX + 6, y);
+            ctx.stroke();
+            ctx.fillText(`${m} m`, scaleX - 38, y + 4);
+          }
+
+          // Tavoitekorkeuden katkoviiva
+          const targetY = groundY - state.distance * meterPx;
+          ctx.save();
+          ctx.setLineDash([6, 5]);
+          ctx.strokeStyle = "#22c55e";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(scaleX + 10, targetY);
+          ctx.lineTo(hoistX + 120, targetY);
+          ctx.stroke();
+          ctx.fillStyle = "#4ade80";
+          ctx.font = "bold 12px system-ui, sans-serif";
+          ctx.fillText(`Tavoitekorkeus h = ${fmt(state.distance, 1)} m`, hoistX + 55, targetY - 7);
+          ctx.restore();
+
+          // Kuorman sijainti
+          const crateSize = 44 + Math.min(22, state.mass * 0.09);
+          const crateBottomY = groundY - state.currentPos * meterPx;
+          const crateCenterY = crateBottomY - crateSize / 2;
+
+          // Taittopyörä ja vaijeri
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(motorX + 20, motorY);
+          ctx.lineTo(hoistX, 58);
+          ctx.lineTo(hoistX, crateCenterY - crateSize / 2);
+          ctx.stroke();
+
+          ctx.fillStyle = "#475569";
+          ctx.beginPath();
+          ctx.arc(hoistX, 58, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Moottori ja partikkelit
+          drawMotorUnit(motorX, motorY, phys, progress);
+          updateAndDrawParticles(dt, motorX, motorY, hoistX, crateBottomY, phys);
+
+          // Kuormalaatikko (sininen massa)
+          ctx.fillStyle = "#3b82f6";
+          ctx.strokeStyle = "#93c5fd";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(hoistX - crateSize / 2, crateBottomY - crateSize, crateSize, crateSize, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Massateksti selkeästi näkyvissä keskellä laatikkoa
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`${state.mass} kg`, hoistX, crateCenterY + 5);
+          ctx.textAlign = "left";
+
+          // Hetkellisen korkeuden osoitin (oikealla puolella)
+          ctx.fillStyle = "#38bdf8";
+          ctx.font = "bold 12px monospace";
+          ctx.fillText(`h = ${fmt(state.currentPos, 2)} m`, hoistX + crateSize / 2 + 14, crateBottomY - 4);
+
+          // Voimavektorit siististi kuorman vasemmalla puolella
+          if (state.showVectors) {
+            const vecLen = Math.min(82, Math.max(38, 32 + phys.force * 0.025));
+            const arrowX = hoistX - crateSize / 2 - 28;
+
+            // Hento katkoviiva kuorman keskipisteestä vektorin lähtöpisteeseen
+            ctx.save();
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(arrowX, crateCenterY);
+            ctx.lineTo(hoistX - crateSize / 2, crateCenterY);
+            ctx.stroke();
+            ctx.restore();
+
+            // Lähtöpisteen merkki
+            ctx.fillStyle = "#94a3b8";
+            ctx.beginPath();
+            ctx.arc(arrowX, crateCenterY, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nostovoima F osoittaa ylöspäin, tekstit vasemmalle
+            drawArrow(
+              arrowX,
+              crateCenterY - 2,
+              arrowX,
+              crateCenterY - vecLen,
+              "#4ade80",
+              "Nostovoima F",
+              `${fmt(phys.force, 1)} N`,
+              "left"
+            );
+
+            // Paino G osoittaa alaspäin, tekstit vasemmalle
+            drawArrow(
+              arrowX,
+              crateCenterY + 2,
+              arrowX,
+              crateCenterY + vecLen,
+              "#f43f5e",
+              "Paino G",
+              `${fmt(phys.weightG, 1)} N`,
+              "left"
+            );
+          }
+        } else {
+          // --- VAAKAVETO ---
+          const groundY = 305;
+          const startX = 115;
+          const endX = 555;
+          const meterPx = (endX - startX) / 10; // 44 px/m
+          const motorX = 685;
+          const motorY = groundY - 34;
+
+          // Alusta (väri ja karkeus kitkakertoimen mukaan)
+          const rough = state.friction;
+          ctx.fillStyle = rough < 0.25 ? "#1e3a5f" : rough > 0.55 ? "#292524" : "#334155";
+          ctx.fillRect(0, groundY, W, H - groundY);
+
+          // Kitkapinnan karkeushampaat
+          ctx.strokeStyle = rough < 0.25 ? "#7dd3fc" : "#94a3b8";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          const step = Math.max(4, Math.round(14 - rough * 12));
+          const amp = rough * 6.5;
+          for (let x = 40; x < 630; x += step) {
+            ctx.moveTo(x, groundY);
+            ctx.lineTo(x + step / 2, groundY + amp);
+            ctx.lineTo(x + step, groundY);
+          }
+          ctx.stroke();
+
+          // Matka-asteikko (0 - 10 m)
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.fillStyle = "#e2e8f0";
+          ctx.font = "11px monospace";
+          for (let m = 0; m <= 10; m++) {
+            const x = startX + m * meterPx;
+            ctx.beginPath();
+            ctx.moveTo(x, groundY + 10);
+            ctx.lineTo(x, groundY + 20);
+            ctx.stroke();
+            ctx.fillText(`${m}m`, x - 9, groundY + 34);
+          }
+
+          // Maaliviiva
+          const targetX = startX + state.distance * meterPx;
+          ctx.save();
+          ctx.setLineDash([6, 5]);
+          ctx.strokeStyle = "#22c55e";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(targetX, 145);
+          ctx.lineTo(targetX, groundY);
+          ctx.stroke();
+          ctx.fillStyle = "#4ade80";
+          ctx.font = "bold 12px system-ui, sans-serif";
+          ctx.fillText(`Maali s = ${fmt(state.distance, 1)} m`, targetX - 42, 136);
+          ctx.restore();
+
+          // Kuorman sijainti
+          const crateW = 56 + Math.min(24, state.mass * 0.08);
+          const crateH = 46 + Math.min(18, state.mass * 0.06);
+          const crateX = startX + state.currentPos * meterPx;
+          const crateCenterY = groundY - crateH / 2;
+
+          // Vetovaijeri
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(crateX + crateW / 2, crateCenterY);
+          ctx.lineTo(motorX + 20, motorY);
+          ctx.stroke();
+
+          // Moottori ja partikkelit
+          drawMotorUnit(motorX, motorY, phys, progress);
+          updateAndDrawParticles(dt, motorX, motorY, crateX, groundY, phys);
+
+          // Kuormalaatikko
+          ctx.fillStyle = "#3b82f6";
+          ctx.strokeStyle = "#93c5fd";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(crateX - crateW / 2, groundY - crateH, crateW, crateH, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`${state.mass} kg`, crateX, crateCenterY + 5);
+          ctx.textAlign = "left";
+
+          // Voimavektorit
+          if (state.showVectors) {
+            const vecLen = Math.min(95, Math.max(44, 36 + phys.force * 0.04));
+            drawArrow(
+              crateX + crateW / 2,
+              crateCenterY - 12,
+              crateX + crateW / 2 + vecLen,
+              crateCenterY - 12,
+              "#4ade80",
+              "Vetovoima F",
+              `${fmt(phys.force, 1)} N`
+            );
+            drawArrow(
+              crateX - crateW / 2,
+              groundY - 8,
+              crateX - crateW / 2 - vecLen,
+              groundY - 8,
+              "#fb923c",
+              "Kitkavoima Fμ",
+              `${fmt(phys.force, 1)} N`
+            );
+          }
+        }
+
+        // Digitaalinen sekuntikello ja nopeusmittari oikeassa yläkulmassa (HUD)
+        const hudX = W - 245;
+        const hudY = 16;
+        ctx.save();
+        ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(hudX, hudY, 228, 94, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.fillText("SEKUNTIKELLO (t)", hudX + 14, hudY + 22);
+
+        ctx.fillStyle = state.finished ? "#4ade80" : "#38bdf8";
+        ctx.font = "bold 25px monospace";
+        ctx.fillText(`${fmt(state.elapsedTime, 2)} s`, hudX + 14, hudY + 52);
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "12px monospace";
+        ctx.fillText(
+          `v = ${fmt(phys.velocity, 2)} m/s (${fmt(phys.velocity * 3.6, 1)} km/h)`,
+          hudX + 14,
+          hudY + 76
+        );
+        ctx.restore();
+      }
+
+      // Päivittää pedagogisen vertailutyökalun näkymän
+      function renderComparison() {
+        const pA = computePhysics(state.testA);
+        const pB = computePhysics(state.testB);
+
+        function buildColHTML(title, badgeColor, params, p) {
+          const modeLabel = params.mode === "vertical" ? "Pystynosto" : `Vaakaveto (μ=${fmt(params.friction, 2)})`;
+          return `
+            <h4>
+              <span>${title}</span>
+              <span style="font-size:0.76rem; background:${badgeColor}; padding:2px 8px; border-radius:99px;">
+                P<sub>otto</sub> = ${params.powerIn} W
+              </span>
+            </h4>
+            <div class="compare-row"><span>Tila ja kuorma:</span><strong>${modeLabel}, ${params.mass} kg</strong></div>
+            <div class="compare-row"><span>Matka (h tai s):</span><strong>${fmt(params.distance, 1)} m</strong></div>
+            <div class="compare-row"><span>Tehty hyötytyö W<sub>hyöty</sub>:</span><strong style="color:var(--work-green)">${fmt(p.usefulWork, 0)} J</strong></div>
+            <div class="compare-row"><span>Hyötyteho P<sub>anto</sub> (η=${params.efficiency}%):</span><strong>${fmt(p.powerOut, 1)} W</strong></div>
+            <div class="compare-row"><span>Suoritusaika t:</span><strong style="color:var(--primary)">${fmt(p.totalTime, 2)} s</strong></div>
+            <div class="compare-row"><span>Sähköenergia E<sub>otto</sub>:</span><strong>${fmt(p.totalElecEnergy, 0)} J</strong></div>
+          `;
+        }
+
+        document.getElementById("compBoxA").innerHTML = buildColHTML("Testi A", "#dbeafe", state.testA, pA);
+        document.getElementById("compBoxB").innerHTML = buildColHTML("Testi B", "#fef3c7", state.testB, pB);
+
+        const summaryEl = document.getElementById("compareSummary");
+        const sameWork = Math.abs(pA.usefulWork - pB.usefulWork) < 0.5;
+
+        if (sameWork) {
+          const ratio = pA.totalTime / pB.totalTime;
+          summaryEl.innerHTML = `
+            <strong>💡 Havainto: Tehty hyötytyö on täsmälleen sama (${fmt(pA.usefulWork, 0)} J)!</strong><br/>
+            Vaikka moottoreiden tehot ovat eri suuret (${state.testA.powerIn} W vs. ${state.testB.powerIn} W), molemmat tekevät yhtä suuren mekaanisen työn.
+            Suurempi teho tarkoittaa, että sama työ tehdään <strong>${fmt(ratio, 1)}-kertaisella nopeudella</strong> (${fmt(pB.totalTime, 2)} s vs. ${fmt(pA.totalTime, 2)} s).
+          `;
+        } else {
+          summaryEl.innerHTML = `
+            <strong>Huomio:</strong> Testien A ja B kuorma tai matka poikkeaa toisistaan, joten myös tehty työ W on eri suuruinen (${fmt(pA.usefulWork, 0)} J vs. ${fmt(pB.usefulWork, 0)} J).
+          `;
+        }
+      }
+
+      // Tallentaa nykyisen mittauspisteen taulukkoon
+      function recordMeasurement() {
+        const phys = computePhysics(state);
+        state.measurements.push({
+          id: state.measurements.length + 1,
+          mode: state.mode === "vertical" ? "Pystynosto" : `Vaakaveto (μ=${fmt(state.friction, 2)})`,
+          mass: state.mass,
+          force: phys.force,
+          distance: state.distance,
+          time: phys.totalTime,
+          usefulWork: phys.usefulWork,
+          powerIn: phys.powerIn,
+          powerOut: phys.powerOut,
+          efficiency: state.efficiency
+        });
+        renderTable();
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("dataTableBody");
+        if (state.measurements.length === 0) {
+          tbody.innerHTML = `
+            <tr class="empty-row">
+              <td colspan="10">Ei tallennettuja mittauksia. Käynnistä nosto tai tallenna mittauspiste painikkeesta.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = state.measurements
+          .map(
+            (m) => `
+          <tr>
+            <td>${m.id}</td>
+            <td><strong>${m.mode}</strong></td>
+            <td>${m.mass}</td>
+            <td>${fmt(m.force, 1)}</td>
+            <td>${fmt(m.distance, 1)}</td>
+            <td><strong>${fmt(m.time, 2)}</strong></td>
+            <td style="color:var(--work-green); font-weight:700;">${fmt(m.usefulWork, 0)}</td>
+            <td>${m.powerIn}</td>
+            <td>${fmt(m.powerOut, 1)}</td>
+            <td><strong>${m.efficiency} %</strong></td>
+          </tr>
+        `
+          )
+          .join("");
+      }
+
+      // Simulaation nollaus
+      function resetSimulation() {
+        state.running = false;
+        state.finished = false;
+        state.elapsedTime = 0;
+        state.currentPos = 0;
+        state.heatParticles = [];
+        state.frictionSparks = [];
+        updateUI();
+      }
+
+      // Tapahtumakuuntelijat
+      tabVertical.addEventListener("click", () => {
+        state.mode = "vertical";
+        tabVertical.classList.add("active");
+        tabHorizontal.classList.remove("active");
+        resetSimulation();
+      });
+
+      tabHorizontal.addEventListener("click", () => {
+        state.mode = "horizontal";
+        tabHorizontal.classList.add("active");
+        tabVertical.classList.remove("active");
+        resetSimulation();
+      });
+
+      rngMass.addEventListener("input", () => {
+        state.mass = Number(rngMass.value);
+        resetSimulation();
+      });
+
+      rngDist.addEventListener("input", () => {
+        state.distance = Number(rngDist.value);
+        resetSimulation();
+      });
+
+      rngFriction.addEventListener("input", () => {
+        state.friction = Number(rngFriction.value);
+        resetSimulation();
+      });
+
+      rngPower.addEventListener("input", () => {
+        state.powerIn = Number(rngPower.value);
+        resetSimulation();
+      });
+
+      rngEff.addEventListener("input", () => {
+        state.efficiency = Number(rngEff.value);
+        resetSimulation();
+      });
+
+      document.querySelectorAll(".power-preset").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.powerIn = Number(btn.dataset.p);
+          rngPower.value = state.powerIn;
+          resetSimulation();
+        });
+      });
+
+      document.querySelectorAll(".speed-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.timeScale = Number(btn.dataset.speed);
+          document.querySelectorAll(".speed-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        });
+      });
+
+      chkVectors.addEventListener("change", () => {
+        state.showVectors = chkVectors.checked;
+      });
+
+      btnStart.addEventListener("click", () => {
+        if (state.finished) {
+          state.elapsedTime = 0;
+          state.currentPos = 0;
+          state.finished = false;
+        }
+        state.running = true;
+        updateUI();
+      });
+
+      btnPause.addEventListener("click", () => {
+        state.running = false;
+        updateUI();
+      });
+
+      btnReset.addEventListener("click", resetSimulation);
+      btnRecord.addEventListener("click", recordMeasurement);
+
+      // Vertailutyökalun painikkeet
+      document.getElementById("btnSaveA").addEventListener("click", () => {
+        state.testA = {
+          mode: state.mode,
+          mass: state.mass,
+          distance: state.distance,
+          friction: state.friction,
+          powerIn: state.powerIn,
+          efficiency: state.efficiency
+        };
+        renderComparison();
+      });
+
+      document.getElementById("btnSaveB").addEventListener("click", () => {
+        state.testB = {
+          mode: state.mode,
+          mass: state.mass,
+          distance: state.distance,
+          friction: state.friction,
+          powerIn: state.powerIn,
+          efficiency: state.efficiency
+        };
+        renderComparison();
+      });
+
+      document.getElementById("btnDemoCompare").addEventListener("click", () => {
+        state.testA = {
+          mode: state.mode,
+          mass: state.mass,
+          distance: state.distance,
+          friction: state.friction,
+          powerIn: 100,
+          efficiency: state.efficiency
+        };
+        state.testB = {
+          mode: state.mode,
+          mass: state.mass,
+          distance: state.distance,
+          friction: state.friction,
+          powerIn: 500,
+          efficiency: state.efficiency
+        };
+        renderComparison();
+      });
+
+      // Taulukon tyhjennys ja CSV-kopiointi
+      document.getElementById("btnClearTable").addEventListener("click", () => {
+        state.measurements = [];
+        renderTable();
+      });
+
+      document.getElementById("btnCopyCsv").addEventListener("click", () => {
+        if (state.measurements.length === 0) return;
+        const header = "Nro;Tila;Massa (kg);Voima (N);Matka (m);Aika (s);Hyotytyo W (J);Ottoteho (W);Hyotyteho (W);Hyotysuhde (%)";
+        const rows = state.measurements.map((m) =>
+          [
+            m.id,
+            m.mode,
+            m.mass,
+            fmt(m.force, 1),
+            fmt(m.distance, 1),
+            fmt(m.time, 2),
+            fmt(m.usefulWork, 0),
+            m.powerIn,
+            fmt(m.powerOut, 1),
+            m.efficiency
+          ].join(";")
+        );
+        const csvText = [header, ...rows].join("\n");
+        navigator.clipboard.writeText(csvText).then(() => {
+          const toast = document.getElementById("copyToast");
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2200);
+        });
+      });
+
+      // Animaatiosilmukka (requestAnimationFrame + performance.now)
+      function animate(now) {
+        if (!state.lastFrameTime) state.lastFrameTime = now;
+        const rawDt = Math.min(0.05, (now - state.lastFrameTime) / 1000);
+        state.lastFrameTime = now;
+
+        if (state.running) {
+          const phys = computePhysics(state);
+          const simDt = rawDt * state.timeScale;
+          state.elapsedTime += simDt;
+          state.drumAngle += phys.velocity * simDt * 3.2;
+
+          if (state.elapsedTime >= phys.totalTime) {
+            state.elapsedTime = phys.totalTime;
+            state.currentPos = state.distance;
+            state.running = false;
+            state.finished = true;
+          } else {
+            state.currentPos = phys.velocity * state.elapsedTime;
+          }
+          updateUI();
+        }
+
+        renderCanvas(rawDt);
+        requestAnimationFrame(animate);
+      }
+
+      // Alustus
+      updateUI();
+      renderComparison();
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>

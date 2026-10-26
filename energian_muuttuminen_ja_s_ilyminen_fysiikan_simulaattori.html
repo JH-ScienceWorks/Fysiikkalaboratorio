@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energian muuttuminen ja säilyminen – 8. lk Fysiikan simulaattori</title>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border-color: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      
+      --color-ep: #16a34a;
+      --color-ep-bg: #dcfce7;
+      --color-ek: #2563eb;
+      --color-ek-bg: #dbeafe;
+      --color-eth: #ea580c;
+      --color-eth-bg: #ffedd5;
+      --color-etot: #1e293b;
+      --color-etot-bg: #e2e8f0;
+
+      --accent-primary: #0284c7;
+      --accent-primary-hover: #0369a1;
+      --accent-success: #15803d;
+      --accent-danger: #dc2626;
+      
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.45;
+      padding: 12px 16px 28px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Yläpalkki */
+    .app-header {
+      max-width: 1440px;
+      margin: 0 auto 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-card);
+      padding: 12px 18px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #16a34a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-title p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .header-formulas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .formula-pill {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .formula-pill.ep { border-color: #86efac; background: var(--color-ep-bg); color: #14532d; }
+    .formula-pill.ek { border-color: #93c5fd; background: var(--color-ek-bg); color: #1e3a8a; }
+    .formula-pill.etot { border-color: #cbd5e1; background: var(--color-etot-bg); color: #0f172a; }
+
+    /* Pääasettelu */
+    .main-grid {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      padding: 14px 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Vasen sarake: Canvas ja ohjauspalkki */
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10.5;
+      min-height: 360px;
+      max-height: 540px;
+      background: #e0f2fe;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      touch-action: none;
+      user-select: none;
+    }
+
+    canvas#simCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    canvas#simCanvas:active {
+      cursor: grabbing;
+    }
+
+    /* Canvas-yläpalkin asetukset */
+    .canvas-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .checkbox-label:hover {
+      background: #e2e8f0;
+    }
+
+    .checkbox-label input {
+      accent-color: var(--accent-primary);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .object-select {
+      font-size: 0.82rem;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Simulaation toisto-ohjaimet */
+    .playback-bar {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-subtle);
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 0.86rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+      min-width: 122px;
+      justify-content: center;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-primary-hover);
+      border-color: var(--accent-primary-hover);
+    }
+
+    .btn-success {
+      background: var(--color-ep);
+      color: #ffffff;
+      border-color: var(--color-ep);
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: var(--accent-success);
+      border-color: var(--accent-success);
+    }
+
+    .btn-danger-outline {
+      color: var(--accent-danger);
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
+
+    .btn-danger-outline:hover:not(:disabled) {
+      background: #fee2e2;
+      border-color: #f87171;
+    }
+
+    .speed-pills {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      gap: 2px;
+    }
+
+    .speed-pill {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .speed-pill.active {
+      background: #ffffff;
+      color: var(--accent-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    /* Oikea sarake: Energiapalkit, Mittaritaulu ja Säätimet */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Energiakaaviot */
+    .energy-viz-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 560px) {
+      .energy-viz-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bars-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 12px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .vertical-bars-area {
+      height: 155px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      align-items: end;
+      padding: 8px 6px 0;
+      border-bottom: 2px solid var(--border-color);
+      position: relative;
+      background-image: linear-gradient(to top, rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+      background-size: 100% 25%;
+    }
+
+    .v-bar-col {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      position: relative;
+    }
+
+    .v-bar-value {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 3px;
+      white-space: nowrap;
+    }
+
+    .v-bar-fill {
+      width: 72%;
+      max-width: 38px;
+      height: 0%;
+      border-radius: 5px 5px 0 0;
+      transition: height 0.04s linear;
+      min-height: 2px;
+    }
+
+    .v-bar-fill.ep { background: linear-gradient(180deg, #22c55e, #15803d); }
+    .v-bar-fill.ek { background: linear-gradient(180deg, #3b82f6, #1d4ed8); }
+    .v-bar-fill.eth { background: linear-gradient(180deg, #f97316, #c2410c); }
+    .v-bar-fill.etot { background: linear-gradient(180deg, #475569, #0f172a); }
+
+    .v-bar-labels {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      text-align: center;
+      padding-top: 6px;
+    }
+
+    .v-bar-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .v-bar-label span {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Pinottu kokonaispalkki */
+    .stacked-section {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .stacked-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .stacked-bar-track {
+      width: 100%;
+      height: 22px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid #cbd5e1;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .stacked-segment {
+      height: 100%;
+      transition: width 0.04s linear;
+    }
+
+    .stacked-segment.ep { background: var(--color-ep); }
+    .stacked-segment.ek { background: var(--color-ek); }
+    .stacked-segment.eth { background: var(--color-eth); }
+
+    /* Numeerinen mittaritaulu */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      align-content: start;
+    }
+
+    .metric-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .metric-box.ep { border-left: 4px solid var(--color-ep); }
+    .metric-box.ek { border-left: 4px solid var(--color-ek); }
+    .metric-box.eth { border-left: 4px solid var(--color-eth); }
+    .metric-box.etot { border-left: 4px solid var(--color-etot); background: #f1f5f9; }
+    .metric-box.kin { border-left: 4px solid var(--accent-primary); }
+
+    .metric-name {
+      font-size: 0.73rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 1px;
+    }
+
+    .metric-sub {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-light);
+    }
+
+    /* Ohjauspaneelin säätimet */
+    .controls-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-group {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .control-badge {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      outline: none;
+      cursor: pointer;
+      accent-color: var(--accent-primary);
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .preset-mini-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .preset-mini-btn {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .preset-mini-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    .preset-mini-btn.active {
+      background: #eff6ff;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* Putoamiskiihtyvyyden valintapainikkeet */
+    .gravity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .gravity-btn {
+      padding: 8px 6px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-light);
+      background: #ffffff;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .gravity-btn:hover {
+      border-color: #94a3b8;
+    }
+
+    .gravity-btn.active {
+      border-color: var(--accent-primary);
+      background: #f0f9ff;
+      box-shadow: 0 2px 5px rgba(2, 132, 199, 0.12);
+    }
+
+    .gravity-planet {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .gravity-val {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Alaosio: Mittaustaulukko ja Pedagoginen opaste */
+    .bottom-grid {
+      max-width: 1440px;
+      margin: 14px auto 0;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .table-container {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      margin-top: 8px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: right;
+    }
+
+    table.data-table th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--border-color);
+      white-space: nowrap;
+      z-index: 1;
+    }
+
+    table.data-table th:first-child,
+    table.data-table td:first-child {
+      text-align: center;
+    }
+
+    table.data-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    table.data-table tbody tr {
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    table.data-table tbody tr:hover {
+      background: #f0f9ff;
+    }
+
+    table.data-table tbody tr.selected-row {
+      background: #e0f2fe;
+      font-weight: 700;
+    }
+
+    .empty-table-msg {
+      padding: 22px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    .toast-msg {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-ep);
+      background: var(--color-ep-bg);
+      padding: 4px 10px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+
+    .toast-msg.visible {
+      opacity: 1;
+    }
+
+    /* Pedagoginen info-laatikko */
+    .pedagogy-content {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pedagogy-box {
+      background: var(--bg-subtle);
+      border-left: 4px solid var(--accent-primary);
+      padding: 9px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .pedagogy-box h4 {
+      color: var(--text-main);
+      font-size: 0.86rem;
+      margin-bottom: 3px;
+    }
+
+    .task-list {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .task-list li strong {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Yläpalkki -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-icon" aria-hidden="true">E</div>
+      <div class="brand-title">
+        <h1>Energian muuttuminen ja säilyminen</h1>
+        <p>8. luokan fysiikka • Nostotyö, potentiaalienergia, liike-energia ja kitka</p>
+      </div>
+    </div>
+    <div class="header-formulas" aria-label="Fysiikan peruskaavat">
+      <span class="formula-pill ep" title="Potentiaalienergia = massa × putoamiskiihtyvyys × korkeus">
+        ● Potentiaalienergia: <strong>E<sub>p</sub> = mgh</strong>
+      </span>
+      <span class="formula-pill ek" title="Liike-energia = ½ × massa × nopeus²">
+        ● Liike-energia: <strong>E<sub>k</sub> = ½mv²</strong>
+      </span>
+      <span class="formula-pill etot" title="Mekaanisen energian ja lämpöenergian summa säilyy vakiona">
+        ● Säilymislaki: <strong>E<sub>kok</sub> = E<sub>p</sub> + E<sub>k</sub> + E<sub>lämpö</sub></strong>
+      </span>
+    </div>
+  </header>
+
+  <!-- Päänäkymä (2 saraketta) -->
+  <main class="main-grid">
+
+    <!-- VASEN SARAKE: Interaktiivinen rata & Toisto-ohjaimet -->
+    <section class="card" aria-label="Simulaation päänäkymä">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🎢 Kaareva U-rata:</span>
+          <code style="font-size:0.82rem; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#334155;">h(x) = 0,2 · x²</code>
+        </div>
+        <div class="canvas-toggles">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkVelocityVec" checked>
+            <span>Nopeusvektori (v⃗)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkMaxHeightLine" checked>
+            <span>Kääntymiskorkeus</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkHeightLine" checked>
+            <span>Hetkellinen korkeus (h)</span>
+          </label>
+          <select id="selectObjectType" class="object-select" aria-label="Valitse liikkuva kappale">
+            <option value="cart">Vaunu</option>
+            <option value="skater">Rullalautailija</option>
+            <option value="ball">Teräspallo</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Canvas-alue -->
+      <div class="canvas-wrapper" id="canvasContainer">
+        <canvas id="simCanvas"></canvas>
+      </div>
+
+      <!-- Simulaation ohjauspalkki -->
+      <div class="playback-bar">
+        <div class="btn-group">
+          <button id="btnPlayPause" class="btn btn-primary" type="button">
+            <span id="playPauseIcon">⏸</span>
+            <span id="playPauseText">Pysäytä</span>
+          </button>
+          <button id="btnStep" class="btn" type="button" title="Siirry 0,05 sekuntia eteenpäin tarkkaa mittausta varten">
+            ⏭ Askel +0,05 s
+          </button>
+          <button id="btnReset" class="btn" type="button" title="Palauta kappale aloituskorkeudelle ja nollaa lämpöenergia">
+            ↺ Palauta alkuun
+          </button>
+        </div>
+
+        <div class="btn-group">
+          <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">Nopeus:</span>
+          <div class="speed-pills" role="group" aria-label="Simulaation hidastus">
+            <button type="button" class="speed-pill" data-speed="0.25">0,25×</button>
+            <button type="button" class="speed-pill" data-speed="0.5">0,5×</button>
+            <button type="button" class="speed-pill active" data-speed="1">1×</button>
+          </div>
+          <button id="btnRecordQuick" class="btn btn-success" type="button" title="Tallenna nykyinen hetki mittaustaulukkoon">
+            ＋ Tallenna mittauspiste
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- OIKEA SARAKE: Energiapalkit, Mittaritaulu ja Säätimet -->
+    <div class="right-column">
+
+      <!-- B. Energiapalkit ja datamittarit -->
+      <section class="card" aria-label="Energiapalkit ja reaaliaikaiset mittarit">
+        <div class="card-header">
+          <div class="card-title">📊 Energian jakautuminen ja suureet</div>
+          <span id="energyConservationBadge" style="font-size:0.75rem; font-weight:600; color:var(--color-ep); background:var(--color-ep-bg); padding:2px 8px; border-radius:999px;">
+            E<sub>p</sub> + E<sub>k</sub> + E<sub>lämpö</sub> = E<sub>kok</sub>
+          </span>
+        </div>
+
+        <div class="energy-viz-grid">
+          <!-- Pylväsdiagrammit + Pinottu palkki -->
+          <div class="bars-box">
+            <div>
+              <div class="vertical-bars-area">
+                <div class="v-bar-col">
+                  <div class="v-bar-value" id="barValEp">0,0 J</div>
+                  <div class="v-bar-fill ep" id="barFillEp" style="height: 0%;"></div>
+                </div>
+                <div class="v-bar-col">
+                  <div class="v-bar-value" id="barValEk">0,0 J</div>
+                  <div class="v-bar-fill ek" id="barFillEk" style="height: 0%;"></div>
+                </div>
+                <div class="v-bar-col">
+                  <div class="v-bar-value" id="barValEth">0,0 J</div>
+                  <div class="v-bar-fill eth" id="barFillEth" style="height: 0%;"></div>
+                </div>
+                <div class="v-bar-col">
+                  <div class="v-bar-value" id="barValEtot">0,0 J</div>
+                  <div class="v-bar-fill etot" id="barFillEtot" style="height: 0%;"></div>
+                </div>
+              </div>
+              <div class="v-bar-labels">
+                <div class="v-bar-label" style="color:var(--color-ep);">E<sub>p</sub><span>Potentiaali</span></div>
+                <div class="v-bar-label" style="color:var(--color-ek);">E<sub>k</sub><span>Liike</span></div>
+                <div class="v-bar-label" style="color:var(--color-eth);">E<sub>lämpö</sub><span>Lämpö</span></div>
+                <div class="v-bar-label" style="color:var(--color-etot);">E<sub>kok</sub><span>Kokonais</span></div>
+              </div>
+            </div>
+
+            <!-- Pinottu kokonaispalkki -->
+            <div class="stacked-section">
+              <div class="stacked-header">
+                <span>Pinottu kokonaisenergia (E<sub>kok</sub>)</span>
+                <span id="stackedPercentText">100 % säilyy</span>
+              </div>
+              <div class="stacked-bar-track" title="Kokonaisenergia jakautuu potentiaali-, liike- ja lämpöenergiaan">
+                <div class="stacked-segment ep" id="stackEp" style="width: 100%;"></div>
+                <div class="stacked-segment ek" id="stackEk" style="width: 0%;"></div>
+                <div class="stacked-segment eth" id="stackEth" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Numeerinen mittaritaulu -->
+          <div class="metrics-grid">
+            <div class="metric-box kin">
+              <div class="metric-name"><span>Korkeus (h)</span><span>m</span></div>
+              <div class="metric-val" id="valHeight">4,00 m</div>
+              <div class="metric-sub" id="valPosX">x = -4,47 m</div>
+            </div>
+            <div class="metric-box kin">
+              <div class="metric-name"><span>Nopeus (v)</span><span>m/s</span></div>
+              <div class="metric-val" id="valSpeedMs">0,00 m/s</div>
+              <div class="metric-sub" id="valSpeedKmh">0,0 km/h</div>
+            </div>
+            <div class="metric-box ep">
+              <div class="metric-name"><span>Potentiaali (E<sub>p</sub>)</span><span>J</span></div>
+              <div class="metric-val" id="valEp">39,2 J</div>
+              <div class="metric-sub">E<sub>p</sub> = mgh</div>
+            </div>
+            <div class="metric-box ek">
+              <div class="metric-name"><span>Liike (E<sub>k</sub>)</span><span>J</span></div>
+              <div class="metric-val" id="valEk">0,0 J</div>
+              <div class="metric-sub">E<sub>k</sub> = ½mv²</div>
+            </div>
+            <div class="metric-box eth">
+              <div class="metric-name"><span>Lämpö (E<sub>lämpö</sub>)</span><span>J</span></div>
+              <div class="metric-val" id="valEth">0,0 J</div>
+              <div class="metric-sub">Kitkahäviö</div>
+            </div>
+            <div class="metric-box etot">
+              <div class="metric-name"><span>Kokonais (E<sub>kok</sub>)</span><span>J</span></div>
+              <div class="metric-val" id="valEtot">39,2 J</div>
+              <div class="metric-sub" id="valTime">t = 0,00 s</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- C. Ohjauspaneeli ja säätimet -->
+      <section class="card" aria-label="Suureiden säätimet">
+        <div class="card-header">
+          <div class="card-title">🎛️ Suureiden säätö</div>
+          <span style="font-size:0.76rem; color:var(--text-muted);">Voit myös raahata kappaletta suoraan radalla</span>
+        </div>
+
+        <div class="controls-stack">
+          <!-- Massa (m) -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="sliderMass">Kappaleen massa (m)</label>
+              <span class="control-badge" id="badgeMass">1,0 kg</span>
+            </div>
+            <input type="range" id="sliderMass" min="0.1" max="10.0" step="0.1" value="1.0">
+            <div class="slider-ticks">
+              <span>0,1 kg (kevyt)</span>
+              <span>1,0 kg</span>
+              <span>5,0 kg</span>
+              <span>10,0 kg (raskas)</span>
+            </div>
+          </div>
+
+          <!-- Kitka -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <label for="sliderFriction">Radan kitka ja ilmanvastus</label>
+              <span class="control-badge" id="badgeFriction">0,00 (Ei kitkaa)</span>
+            </div>
+            <input type="range" id="sliderFriction" min="0" max="2" step="0.05" value="0">
+            <div class="preset-mini-btns">
+              <button type="button" class="preset-mini-btn active" data-friction="0">0 = Ei kitkaa (Ihanteellinen)</button>
+              <button type="button" class="preset-mini-btn" data-friction="1">1 = Pieni kitka</button>
+              <button type="button" class="preset-mini-btn" data-friction="2">2 = Suuri kitka</button>
+            </div>
+          </div>
+
+          <!-- Putoamiskiihtyvyys (g) -->
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Putoamiskiihtyvyys (g) – Taivaankappale</span>
+              <span class="control-badge" id="badgeGravity">9,8 m/s²</span>
+            </div>
+            <div class="gravity-grid" role="radiogroup" aria-label="Putoamiskiihtyvyys">
+              <button type="button" class="gravity-btn active" data-g="9.8" data-env="earth">
+                <span class="gravity-planet">🌍 Maa</span>
+                <span class="gravity-val">g = 9,8 m/s²</span>
+              </button>
+              <button type="button" class="gravity-btn" data-g="1.6" data-env="moon">
+                <span class="gravity-planet">🌙 Kuu</span>
+                <span class="gravity-val">g = 1,6 m/s²</span>
+              </button>
+              <button type="button" class="gravity-btn" data-g="3.7" data-env="mars">
+                <span class="gravity-planet">🔴 Mars</span>
+                <span class="gravity-val">g = 3,7 m/s²</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Alaosio: Mittaustaulukko ja Pedagoginen opaste -->
+  <section class="bottom-grid">
+    <!-- D. Pedagoginen mittaustyökalu (Datataulukko) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋 Kokeellinen mittaustaulukko</span>
+          <span class="toast-msg" id="copyToast">Kopioitu leikepöydälle!</span>
+        </div>
+        <div class="btn-group">
+          <button id="btnRecordTable" class="btn btn-success" type="button">
+            ＋ Tallenna mittauspiste taulukkoon
+          </button>
+          <button id="btnCopyTable" class="btn" type="button" title="Kopioi taulukon tiedot taulukkolaskentaohjelmaan">
+            📋 Kopioi taulukko (CSV)
+          </button>
+          <button id="btnClearTable" class="btn btn-danger-outline" type="button">
+            🗑 Tyhjennä
+          </button>
+        </div>
+      </div>
+      <p style="font-size:0.79rem; color:var(--text-muted);">
+        Pysäytä simulaatio tai käytä askellusta (<strong>+0,05 s</strong>) ja tallenna mittauspisteitä eri korkeuksilta. Klikkaamalla taulukon riviä näet kyseisen mittauspisteen sijainnin radalla.
+      </p>
+
+      <div class="table-container">
+        <table class="data-table" aria-label="Tallennetut mittauspisteet">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Aika t (s)</th>
+              <th>Korkeus h (m)</th>
+              <th>Nopeus v (m/s)</th>
+              <th style="color:var(--color-ep);">E<sub>p</sub> (J)</th>
+              <th style="color:var(--color-ek);">E<sub>k</sub> (J)</th>
+              <th style="color:var(--color-eth);">E<sub>lämpö</sub> (J)</th>
+              <th style="color:var(--color-etot);">E<sub>kok</sub> (J)</th>
+            </tr>
+          </thead>
+          <tbody id="measurementTableBody">
+            <!-- Täytetään dynaamisesti -->
+          </tbody>
+        </table>
+        <div id="emptyTableMessage" class="empty-table-msg">
+          Ei vielä tallennettuja mittauspisteitä. Paina <strong>"Tallenna mittauspiste taulukkoon"</strong> kerätäksesi havaintoja!
+        </div>
+      </div>
+    </div>
+
+    <!-- Opettajan ja oppilaan vinkit (8. lk OPS) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💡 Fysiikan ilmiöt ja tutkimustehtävät (8. lk)</div>
+      </div>
+      <div class="pedagogy-content">
+        <div class="pedagogy-box">
+          <h4>1. Nostotyö ja potentiaalienergia (W = E<sub>p</sub> = mgh)</h4>
+          <p>
+            Kun raahaat kappaleen radan pohjalta korkeudelle <strong>h</strong>, teet <strong>nostotyötä W = mgh</strong>. Kappaleeseen varastoituu yhtä suuri määrä potentiaalienergiaa <strong>E<sub>p</sub></strong>.
+          </p>
+        </div>
+        <div class="pedagogy-box" style="border-left-color: var(--color-ep);">
+          <h4>2. Energian muuntuminen ja säilyminen</h4>
+          <p>
+            Kitkattomalla radalla mekaaninen energia säilyy: laskussa <strong>E<sub>p</sub></strong> muuntuu liike-energiaksi <strong>E<sub>k</sub> = ½mv²</strong>. Pohjalla (h = 0 m) nopeus ja liike-energia ovat suurimmillaan. Kitkallisella radalla liike-energiaa muuntuu vähitellen lämpöenergiaksi <strong>E<sub>lämpö</sub></strong>, kunnes kappale pysähtyy pohjalle.
+          </p>
+        </div>
+        <div>
+          <strong style="color:var(--text-main); display:block; margin-bottom:4px;">Kokeile ja tutki:</strong>
+          <ol class="task-list">
+            <li><strong>Massan vaikutus nopeuteen:</strong> Nosta 1,0 kg kappale 4,0 metrin korkeudelle (kitka = 0). Mittaa suurin nopeus radan pohjalla. Muuta massaksi 5,0 kg. Muuttuuko pohjan maksiminopeus? Entä energia?</li>
+            <li><strong>Säilymislain tarkistus:</strong> Pysäytä liike kolmessa eri kohdassa ja tallenna pisteet taulukkoon. Laske yhteen E<sub>p</sub> + E<sub>k</sub> + E<sub>lämpö</sub>. Mitä huomaat?</li>
+            <li><strong>Kuun ja Marsin painovoima:</strong> Vertaile kuinka korkealle kappale nousee ja kuinka nopeasti se liikkuu Kuussa (g = 1,6 m/s²) verrattuna Maahan (g = 9,8 m/s²).</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // --- 1. FYSIIKAN VAKIOT JA SIMULAATION TILA ---
+      const TRACK_A = 0.2;       // Paraabelin kerroin: y(x) = 0.2 * x^2
+      const X_MIN = -5.0;        // Radan vasen reuna (m)
+      const X_MAX = 5.0;         // Radan oikea reuna (m)
+      const H_MAX = 5.0;         // Radan maksimikorkeus (m), koska 0.2 * 5^2 = 5.0
+
+      const state = {
+        // Kappaleen tila
+        x: -Math.sqrt(4.0 / TRACK_A), // Alussa h = 4,00 m vasemmalla (-4,472 m)
+        h: 4.0,
+        v: 0.0,                       // Tangentiaalinen nopeus v_s (m/s), + oikealle, - vasemmalle
+        initialX: -Math.sqrt(4.0 / TRACK_A),
+        initialH: 4.0,
+
+        // Fysiikan parametrit
+        m: 1.0,                       // Massa (kg)
+        g: 9.8,                       // Putoamiskiihtyvyys (m/s^2)
+        env: "earth",                 // "earth" | "moon" | "mars"
+        friction: 0.0,                // Kitkasäädin 0.0 ... 2.0
+
+        // Energiat (J)
+        ep: 0.0,
+        ek: 0.0,
+        eth: 0.0,
+        etot: 0.0,
+
+        // Aika ja ohjaus
+        t: 0.0,
+        running: true,
+        timeScale: 1.0,
+        isDragging: false,
+        objectType: "cart",           // "cart" | "skater" | "ball"
+
+        // Näyttöasetukset
+        showVelocityVec: true,
+        showMaxHeightLine: true,
+        showHeightLine: true,
+
+        // Mittaustaulukko
+        measurements: [],
+        selectedMeasurementId: null
+      };
+
+      // Alustetaan energiat
+      function initEnergiesFromRest(xPos) {
+        state.x = Math.max(X_MIN, Math.min(X_MAX, xPos));
+        state.h = TRACK_A * state.x * state.x;
+        state.v = 0.0;
+        state.t = 0.0;
+        state.eth = 0.0;
+        state.ep = state.m * state.g * state.h;
+        state.ek = 0.0;
+        state.etot = state.ep;
+      }
+
+      initEnergiesFromRest(state.x);
+
+      // --- 2. SUOMALAINEN LUKUMUOTOILU ---
+      function fmt(num, decimals = 1) {
+        if (!Number.isFinite(num)) return "0";
+        // Estetään "-0,0"
+        const clean = Math.abs(num) < 1e-9 ? 0 : num;
+        return clean.toFixed(decimals).replace(".", ",");
+      }
+
+      // --- 3. DOM-ELEMENTIT ---
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const chkVelocityVec = document.getElementById("chkVelocityVec");
+      const chkMaxHeightLine = document.getElementById("chkMaxHeightLine");
+      const chkHeightLine = document.getElementById("chkHeightLine");
+      const selectObjectType = document.getElementById("selectObjectType");
+
+      const btnPlayPause = document.getElementById("btnPlayPause");
+      const playPauseIcon = document.getElementById("playPauseIcon");
+      const playPauseText = document.getElementById("playPauseText");
+      const btnStep = document.getElementById("btnStep");
+      const btnReset = document.getElementById("btnReset");
+      const btnRecordQuick = document.getElementById("btnRecordQuick");
+      const speedPills = document.querySelectorAll(".speed-pill");
+
+      const barValEp = document.getElementById("barValEp");
+      const barValEk = document.getElementById("barValEk");
+      const barValEth = document.getElementById("barValEth");
+      const barValEtot = document.getElementById("barValEtot");
+
+      const barFillEp = document.getElementById("barFillEp");
+      const barFillEk = document.getElementById("barFillEk");
+      const barFillEth = document.getElementById("barFillEth");
+      const barFillEtot = document.getElementById("barFillEtot");
+
+      const stackEp = document.getElementById("stackEp");
+      const stackEk = document.getElementById("stackEk");
+      const stackEth = document.getElementById("stackEth");
+      const stackedPercentText = document.getElementById("stackedPercentText");
+
+      const valHeight = document.getElementById("valHeight");
+      const valPosX = document.getElementById("valPosX");
+      const valSpeedMs = document.getElementById("valSpeedMs");
+      const valSpeedKmh = document.getElementById("valSpeedKmh");
+      const valEp = document.getElementById("valEp");
+      const valEk = document.getElementById("valEk");
+      const valEth = document.getElementById("valEth");
+      const valEtot = document.getElementById("valEtot");
+      const valTime = document.getElementById("valTime");
+
+      const sliderMass = document.getElementById("sliderMass");
+      const badgeMass = document.getElementById("badgeMass");
+      const sliderFriction = document.getElementById("sliderFriction");
+      const badgeFriction = document.getElementById("badgeFriction");
+      const frictionPresetBtns = document.querySelectorAll(".preset-mini-btn");
+      const gravityBtns = document.querySelectorAll(".gravity-btn");
+      const badgeGravity = document.getElementById("badgeGravity");
+
+      const btnRecordTable = document.getElementById("btnRecordTable");
+      const btnCopyTable = document.getElementById("btnCopyTable");
+      const btnClearTable = document.getElementById("btnClearTable");
+      const measurementTableBody = document.getElementById("measurementTableBody");
+      const emptyTableMessage = document.getElementById("emptyTableMessage");
+      const copyToast = document.getElementById("copyToast");
+
+      // --- 4. FYSIIKKAMOOTTORI (TARKKA ENERGIAN SÄILYMINEN + SUB-STEPPING) ---
+      /**
+       * Integroi kappaleen liikettä paraabelilla y(x) = a * x^2
+       * käyttäen 20 aliaskelta (sub-stepping) ja eksaktia energiakorjausta,
+       * jolloin E_p + E_k + E_lämpö === E_kok 100 % tarkkuudella joka hetki.
+       */
+      function stepPhysics(dtTotal) {
+        if (dtTotal <= 0 || state.isDragging) return;
+
+        const SUBSTEPS = 24;
+        const dt = dtTotal / SUBSTEPS;
+
+        for (let i = 0; i < SUBSTEPS; i++) {
+          const x = state.x;
+          const v = state.v;
+
+          // Mekaaninen energia, joka on jäljellä
+          let eMech = Math.max(0, state.etot - state.eth);
+
+          // Jos kappale on käytännössä pysähtynyt pohjalle
+          if (eMech <= 1e-5 && Math.abs(x) < 1e-3 && Math.abs(v) < 1e-3) {
+            state.x = 0;
+            state.h = 0;
+            state.v = 0;
+            state.ep = 0;
+            state.ek = 0;
+            state.eth = state.etot;
+            return;
+          }
+
+          // Paraabelin derivaatta dy/dx = 2*a*x ja kaarenpituustekijä gamma = ds/dx
+          const dydx = 2 * TRACK_A * x;
+          const gamma = Math.sqrt(1 + dydx * dydx);
+          const sinTheta = dydx / gamma;
+          const cosTheta = 1 / gamma;
+
+          // Tangentiaalinen gravitaatiokiihtyvyys: a_grav = -g * sin(theta)
+          const aGrav = -state.g * sinTheta;
+
+          // Puoliaskeleen nopeus (Velocity Verlet / Midpoint -tyyppinen ennuste)
+          let vMid = v + 0.5 * aGrav * dt;
+
+          // Jos ollaan ylämäessä (x * v > 0), pidetään suunta ylämäkeen, kunnes tarkka kääntymispiste saavutetaan
+          if (x * v > 0 && x * vMid < 0) {
+            vMid = 0.5 * v;
+          }
+
+          // Paikan muutos dx = (ds/dt) / (ds/dx) * dt
+          const dx = (vMid / gamma) * dt;
+          let xNew = x + dx;
+
+          // Rajoitetaan radan reunoihin [-5 m, 5 m]
+          if (xNew < X_MIN) xNew = X_MIN;
+          if (xNew > X_MAX) xNew = X_MAX;
+
+          // Kuljettu kaarenpituus |ds|
+          const ds = gamma * Math.abs(xNew - x);
+
+          // Lasketaan kitkan synnyttämä lämpöenergia dE_lämpö = F_kitka * ds
+          if (state.friction > 0 && ds > 0) {
+            // Yhdistetty vierintäkitka (verrannollinen tukivoimaan) ja ilmanvastustermi
+            const mu = state.friction;
+            const normalAccel = Math.max(0.2 * state.g, state.g * cosTheta + (v * v * 2 * TRACK_A) / (gamma * gamma * gamma));
+            const fFriction = state.m * (mu * 0.085 * normalAccel + mu * 0.055 * Math.abs(vMid));
+            let dEth = fFriction * ds;
+
+            const hCandidate = TRACK_A * xNew * xNew;
+            const epCandidate = state.m * state.g * hCandidate;
+            const maxAllowedEth = Math.max(0, state.etot - epCandidate);
+
+            state.eth = Math.min(state.etot, Math.min(maxAllowedEth, state.eth + dEth));
+            eMech = Math.max(0, state.etot - state.eth);
+          }
+
+          // Tarkistetaan potentiaalienergia uudessa pisteessä
+          let hNew = TRACK_A * xNew * xNew;
+          let epNew = state.m * state.g * hNew;
+
+          // Tarkistetaan, saavuttiko kappale kääntymispisteen (E_p >= E_mech)
+          if (epNew >= eMech) {
+            // Asetetaan kappale täsmälleen kääntymispisteeseen
+            const hTurn = Math.min(H_MAX, eMech / (state.m * state.g));
+            const xTurnMag = Math.sqrt(Math.max(0, hTurn / TRACK_A));
+            const signX = xNew >= 0 ? 1 : -1;
+
+            state.x = signX * xTurnMag;
+            state.h = TRACK_A * state.x * state.x;
+            state.ep = state.m * state.g * state.h;
+            state.ek = 0.0;
+
+            // Jos kääntymispiste on radan pohjalla, kappale pysähtyy kokonaan
+            if (xTurnMag < 1e-4) {
+              state.x = 0;
+              state.h = 0;
+              state.v = 0;
+              state.ep = 0;
+              state.ek = 0;
+              state.eth = state.etot;
+              return;
+            } else {
+              // Käännetään nopeuden etumerkki kohti radan pohjaa seuraavaa aliaskelta varten
+              state.v = -signX * 1e-5;
+            }
+          } else {
+            // Kappale on liikkeessä kääntymispisteiden välissä -> Lasketaan nopeus tarkasti energiasta
+            state.x = xNew;
+            state.h = hNew;
+            state.ep = epNew;
+            state.ek = Math.max(0, eMech - state.ep);
+
+            const speedMag = Math.sqrt((2 * state.ek) / state.m);
+            // Nopeuden suunta määräytyy vMid-suunnasta (tai jos vMid == 0, rinteen kaltevuudesta kohti pohjaa)
+            let dir = vMid >= 0 ? 1 : -1;
+            if (Math.abs(vMid) < 1e-8) {
+              dir = state.x >= 0 ? -1 : 1;
+            }
+            state.v = dir * speedMag;
+          }
+
+          state.t += dt;
+        }
+      }
+
+      // Kun massaa tai putoamiskiihtyvyyttä muutetaan kesken simulaation:
+      // Päivitetään E_p = mgh, E_k = 0.5*m*v^2 ja skaalataan E_kok vastaamaan uutta tilaa.
+      function recalculateEnergiesOnParamChange() {
+        state.h = TRACK_A * state.x * state.x;
+        state.ep = state.m * state.g * state.h;
+        state.ek = 0.5 * state.m * state.v * state.v;
+        // Jos kappale on alkuasemassa levossa, nollataan lämpö
+        if (Math.abs(state.v) < 1e-5 && state.t === 0) {
+          state.eth = 0;
+        }
+        state.etot = state.ep + state.ek + state.eth;
+      }
+
+      // --- 5. CANVAS-PIIRTO JA KOORDINAATISTOMUUNNOKSET ---
+      let canvasWidth = 800;
+      let canvasHeight = 520;
+
+      // Muuntaa fysiikan (x, y) [m] -> Canvas (px)
+      function getPlotBounds() {
+        const padLeft = 64;
+        const padRight = 56;
+        const padTop = 68;
+        const padBottom = 56;
+        return {
+          left: padLeft,
+          right: canvasWidth - padRight,
+          top: padTop,
+          bottom: canvasHeight - padBottom,
+          width: canvasWidth - padLeft - padRight,
+          height: canvasHeight - padTop - padBottom
+        };
+      }
+
+      function worldToScreen(wx, wy) {
+        const b = getPlotBounds();
+        const sx = b.left + ((wx - X_MIN) / (X_MAX - X_MIN)) * b.width;
+        const sy = b.bottom - (wy / H_MAX) * b.height;
+        return { x: sx, y: sy };
+      }
+
+      function screenToWorldX(sx) {
+        const b = getPlotBounds();
+        const norm = (sx - b.left) / b.width;
+        const wx = X_MIN + norm * (X_MAX - X_MIN);
+        return Math.max(X_MIN, Math.min(X_MAX, wx));
+      }
+
+      function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvasWidth = Math.max(320, rect.width);
+        canvasHeight = Math.max(280, rect.height);
+        canvas.width = Math.round(canvasWidth * dpr);
+        canvas.height = Math.round(canvasHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        renderCanvas();
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+
+      // Taustateema valitun taivaankappaleen mukaan
+      function drawEnvironmentBackground(b) {
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, b.bottom);
+        if (state.env === "earth") {
+          skyGrad.addColorStop(0, "#bae6fd");
+          skyGrad.addColorStop(1, "#f0f9ff");
+        } else if (state.env === "moon") {
+          skyGrad.addColorStop(0, "#0f172a");
+          skyGrad.addColorStop(1, "#334155");
+        } else {
+          // Mars
+          skyGrad.addColorStop(0, "#fed7aa");
+          skyGrad.addColorStop(1, "#ffedd5");
+        }
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        // Jos Kuu, piirretään muutama tähti
+        if (state.env === "moon") {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+          const stars = [
+            [0.12, 0.15], [0.24, 0.08], [0.38, 0.22], [0.55, 0.12],
+            [0.68, 0.18], [0.82, 0.09], [0.91, 0.24], [0.18, 0.35], [0.76, 0.32]
+          ];
+          stars.forEach(([rx, ry]) => {
+            ctx.beginPath();
+            ctx.arc(rx * canvasWidth, ry * canvasHeight, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        // Maaperä vertailutason h = 0 m alapuolella
+        ctx.fillStyle = state.env === "earth" ? "#dcfce7" : (state.env === "moon" ? "#475569" : "#fdba74");
+        ctx.fillRect(0, b.bottom, canvasWidth, canvasHeight - b.bottom);
+
+        ctx.strokeStyle = state.env === "moon" ? "#94a3b8" : "#64748b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, b.bottom);
+        ctx.lineTo(canvasWidth, b.bottom);
+        ctx.stroke();
+      }
+
+      // Piirtää korkeusasteikon (0 m ... 5 m) ja vaaka-asteikon (-5 m ... 5 m)
+      function drawGridAndScales(b) {
+        const isDark = state.env === "moon";
+        const gridColor = isDark ? "rgba(255, 255, 255, 0.14)" : "rgba(15, 23, 42, 0.09)";
+        const textColor = isDark ? "#e2e8f0" : "#334155";
+
+        ctx.font = "600 12px system-ui, sans-serif";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+
+        // Vaakaviivat (korkeus h = 0 ... 5 m)
+        for (let h = 0; h <= 5; h++) {
+          const p = worldToScreen(0, h);
+          ctx.strokeStyle = h === 0 ? (isDark ? "#cbd5e1" : "#475569") : gridColor;
+          ctx.lineWidth = h === 0 ? 1.8 : 1;
+          ctx.beginPath();
+          ctx.moveTo(b.left, p.y);
+          ctx.lineTo(b.right, p.y);
+          ctx.stroke();
+
+          ctx.fillStyle = textColor;
+          ctx.fillText(h + " m", b.left - 10, p.y);
+        }
+
+        // Vertailutason teksti
+        ctx.save();
+        ctx.font = "600 11px system-ui, sans-serif";
+        ctx.fillStyle = isDark ? "#cbd5e1" : "#475569";
+        ctx.textAlign = "left";
+        ctx.fillText("Vertailutaso h = 0 m", b.left + 6, b.bottom + 16);
+        ctx.restore();
+
+        // Pystyviivat ja x-asteikko (-5 m ... 5 m)
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        for (let x = -5; x <= 5; x += 1) {
+          const p = worldToScreen(x, 0);
+          ctx.strokeStyle = x === 0 ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(15,23,42,0.18)") : gridColor;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, b.top);
+          ctx.lineTo(p.x, b.bottom);
+          ctx.stroke();
+
+          if (x % 2 === 0 || x === -5 || x === 5) {
+            ctx.fillStyle = textColor;
+            ctx.fillText(x + " m", p.x, b.bottom + 8);
+          }
+        }
+      }
+
+      // Piirtää U-radan ja sen tukirakenteet
+      function drawTrack(b) {
+        const isDark = state.env === "moon";
+
+        // Tukipilarit radan alla
+        ctx.strokeStyle = isDark ? "rgba(148, 163, 184, 0.35)" : "rgba(100, 116, 139, 0.35)";
+        ctx.lineWidth = 2;
+        for (let x = -5; x <= 5; x += 1) {
+          if (x === 0) continue;
+          const yTrack = TRACK_A * x * x;
+          const pTop = worldToScreen(x, yTrack);
+          const pBot = worldToScreen(x, 0);
+          ctx.beginPath();
+          ctx.moveTo(pTop.x, pTop.y);
+          ctx.lineTo(pBot.x, pBot.y);
+          ctx.stroke();
+        }
+
+        // Radan varjo/runko
+        ctx.beginPath();
+        const steps = 100;
+        for (let i = 0; i <= steps; i++) {
+          const wx = X_MIN + (i / steps) * (X_MAX - X_MIN);
+          const wy = TRACK_A * wx * wx;
+          const p = worldToScreen(wx, wy);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = isDark ? "#94a3b8" : "#334155";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Radan sisäpinta (jos kitkaa on, näytetään karkeampi oransertava pinta)
+        ctx.strokeStyle = state.friction > 0
+          ? (state.friction > 1.0 ? "#f97316" : "#fbbf24")
+          : "#38bdf8";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+      }
+
+      // Piirtää kääntymispisteen / maksimikorkeuden viivan ja hetkellisen korkeuden h viivan
+      function drawHeightLines(b) {
+        const isDark = state.env === "moon";
+
+        // 1. Kääntymiskorkeus (mekaanisen energian mukainen maksimikorkeus h_max = E_mech / mg)
+        if (state.showMaxHeightLine && state.etot > 0.001) {
+          const eMech = Math.max(0, state.etot - state.eth);
+          const hTurn = Math.min(H_MAX, eMech / (state.m * state.g));
+          const pTurn = worldToScreen(0, hTurn);
+
+          ctx.save();
+          ctx.setLineDash([7, 5]);
+          ctx.strokeStyle = "#16a34a";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(b.left, pTurn.y);
+          ctx.lineTo(b.right, pTurn.y);
+          ctx.stroke();
+
+          // Tekstilaatikko oikeassa reunassa
+          const label = "Kääntymiskorkeus h_max = " + fmt(hTurn, 2) + " m";
+          ctx.font = "700 11.5px system-ui, sans-serif";
+          const tw = ctx.measureText(label).width + 12;
+          const lx = b.right - tw - 6;
+          const ly = Math.max(b.top + 4, pTurn.y - 22);
+
+          ctx.fillStyle = "rgba(22, 163, 74, 0.92)";
+          ctx.beginPath();
+          ctx.roundRect(lx, ly, tw, 19, 5);
+          ctx.fill();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.fillText(label, lx + 6, ly + 9.5);
+          ctx.restore();
+        }
+
+        // 2. Hetkellinen korkeusviiva (h)
+        if (state.showHeightLine) {
+          const pObj = worldToScreen(state.x, state.h);
+          const pAxis = worldToScreen(X_MIN, state.h);
+
+          ctx.save();
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = isDark ? "#38bdf8" : "#0284c7";
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(b.left, pObj.y);
+          ctx.lineTo(pObj.x, pObj.y);
+          ctx.stroke();
+
+          // Pystysuora mittanuoli maasta kappaleeseen
+          const pGround = worldToScreen(state.x, 0);
+          ctx.strokeStyle = isDark ? "rgba(56, 189, 248, 0.65)" : "rgba(2, 132, 199, 0.65)";
+          ctx.beginPath();
+          ctx.moveTo(pObj.x, pGround.y);
+          ctx.lineTo(pObj.x, pObj.y);
+          ctx.stroke();
+
+          // h-arvon lipuke vasemmassa reunassa
+          const hLabel = "h = " + fmt(state.h, 2) + " m";
+          ctx.font = "700 11.5px ui-monospace, monospace";
+          const hw = ctx.measureText(hLabel).width + 12;
+          ctx.fillStyle = "#0284c7";
+          ctx.beginPath();
+          ctx.roundRect(b.left + 6, pObj.y - 10, hw, 20, 5);
+          ctx.fill();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.fillText(hLabel, b.left + 12, pObj.y);
+          ctx.restore();
+        }
+      }
+
+      // Piirtää valitun taulukkorivin haamupisteen radalle
+      function drawSelectedMeasurementMarker() {
+        if (state.selectedMeasurementId === null) return;
+        const rec = state.measurements.find(m => m.id === state.selectedMeasurementId);
+        if (!rec) return;
+
+        const p = worldToScreen(rec.x, rec.h);
+        ctx.save();
+        ctx.strokeStyle = "#7c3aed";
+        ctx.fillStyle = "rgba(124, 58, 237, 0.22)";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#6d28d9";
+        ctx.font = "700 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Mittaus #" + rec.id, p.x, p.y - 22);
+        ctx.restore();
+      }
+
+      // Piirtää itse liikkuvan kappaleen (Vaunu / Rullalautailija / Teräspallo)
+      function drawMovingObject() {
+        const p = worldToScreen(state.x, state.h);
+
+        // Lasketaan radan näytöllinen tangenttikulma
+        const dxSmall = 0.05;
+        const p1 = worldToScreen(state.x - dxSmall, TRACK_A * Math.pow(state.x - dxSmall, 2));
+        const p2 = worldToScreen(state.x + dxSmall, TRACK_A * Math.pow(state.x + dxSmall, 2));
+        const screenAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+
+        // Skaalataan kappaletta hieman massan mukaan (0.85x ... 1.25x)
+        const scale = 0.88 + (state.m / 10.0) * 0.32;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(screenAngle);
+
+        if (state.objectType === "ball") {
+          const radius = 15 * scale;
+          const ballGrad = ctx.createRadialGradient(-4, -radius - 4, 2, 0, -radius, radius);
+          ballGrad.addColorStop(0, "#f8fafc");
+          ballGrad.addColorStop(0.4, "#38bdf8");
+          ballGrad.addColorStop(1, "#0f172a");
+
+          ctx.fillStyle = ballGrad;
+          ctx.beginPath();
+          ctx.arc(0, -radius - 2, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#ffffff";
+          ctx.stroke();
+        } else if (state.objectType === "skater") {
+          // Rullalauta + hahmo
+          const w = 44 * scale;
+          // Lauta
+          ctx.fillStyle = "#e11d48";
+          ctx.beginPath();
+          ctx.roundRect(-w / 2, -12, w, 6, 3);
+          ctx.fill();
+
+          // Pyörät
+          ctx.fillStyle = "#1e293b";
+          ctx.beginPath();
+          ctx.arc(-w * 0.3, -4, 4.5, 0, Math.PI * 2);
+          ctx.arc(w * 0.3, -4, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Hahmo
+          ctx.strokeStyle = "#0284c7";
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          // Jalat
+          ctx.beginPath();
+          ctx.moveTo(-8, -12);
+          ctx.lineTo(-2, -26);
+          ctx.lineTo(8, -12);
+          ctx.stroke();
+          // Vartalo
+          ctx.beginPath();
+          ctx.moveTo(-2, -26);
+          ctx.lineTo(0, -42);
+          ctx.stroke();
+          // Kädet
+          ctx.beginPath();
+          ctx.moveTo(-12, -35);
+          ctx.lineTo(0, -39);
+          ctx.lineTo(12, -33);
+          ctx.stroke();
+          // Pää + kypärä
+          ctx.fillStyle = "#fde047";
+          ctx.beginPath();
+          ctx.arc(0, -49, 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        } else {
+          // Oletus: Fysiikan mittavaunu
+          const w = 46 * scale;
+          const h = 22 * scale;
+
+          // Pyörät
+          ctx.fillStyle = "#0f172a";
+          ctx.beginPath();
+          ctx.arc(-w * 0.32, -5, 6, 0, Math.PI * 2);
+          ctx.arc(w * 0.32, -5, 6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#e2e8f0";
+          ctx.beginPath();
+          ctx.arc(-w * 0.32, -5, 2.5, 0, Math.PI * 2);
+          ctx.arc(w * 0.32, -5, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Vaunun kori
+          const cartGrad = ctx.createLinearGradient(0, -h - 8, 0, -8);
+          cartGrad.addColorStop(0, "#0284c7");
+          cartGrad.addColorStop(1, "#0369a1");
+          ctx.fillStyle = cartGrad;
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(-w / 2, -h - 8, w, h, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Massamerkintä vaunun kyljessä
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "700 10px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(fmt(state.m, 1) + " kg", 0, -h / 2 - 8);
+        }
+
+        // Jos kitka lämmittää, näytetään pieni lämpöhehku renkaiden alla liikkeessä
+        if (state.friction > 0 && Math.abs(state.v) > 0.3) {
+          const glowAlpha = Math.min(0.85, (Math.abs(state.v) / 8) * state.friction * 0.6);
+          ctx.fillStyle = `rgba(249, 115, 22, ${glowAlpha})`;
+          ctx.beginPath();
+          ctx.arc(0, -3, 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        // Nopeusvektori (nuoli tangentin suuntaan)
+        if (state.showVelocityVec && Math.abs(state.v) > 0.08) {
+          const vecScale = 9.5; // px per (m/s)
+          const dir = state.v >= 0 ? 1 : -1;
+          const len = Math.min(115, Math.max(18, Math.abs(state.v) * vecScale));
+          const vx = Math.cos(screenAngle) * len * dir;
+          const vy = Math.sin(screenAngle) * len * dir;
+
+          const startX = p.x;
+          const startY = p.y - 18;
+          const endX = startX + vx;
+          const endY = startY + vy;
+
+          ctx.save();
+          ctx.strokeStyle = "#2563eb";
+          ctx.fillStyle = "#2563eb";
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+
+          // Nuolenkärki
+          const headAngle = Math.atan2(vy, vx);
+          const headLen = 10;
+          ctx.beginPath();
+          ctx.moveTo(endX, endY);
+          ctx.lineTo(endX - headLen * Math.cos(headAngle - Math.PI / 6), endY - headLen * Math.sin(headAngle - Math.PI / 6));
+          ctx.lineTo(endX - headLen * Math.cos(headAngle + Math.PI / 6), endY - headLen * Math.sin(headAngle + Math.PI / 6));
+          ctx.closePath();
+          ctx.fill();
+
+          // v-teksti nuolen kärjen vieressä
+          ctx.font = "700 11.5px ui-monospace, monospace";
+          ctx.fillStyle = "#1e40af";
+          ctx.textAlign = "center";
+          ctx.fillText("v = " + fmt(Math.abs(state.v), 1) + " m/s", endX, endY - 10);
+          ctx.restore();
+        }
+      }
+
+      // Piirtää analogisen + digitaalisen nopeusmittarin Canvasin yläosaan
+      function drawSpeedometer() {
+        const cx = canvasWidth / 2;
+        const cy = 66;
+        const r = 44;
+        const maxSpeed = 10.0; // m/s (5 m korkeudelta Maassa v_max = sqrt(2*9.8*5) = 9.9 m/s)
+        const speed = Math.abs(state.v);
+        const speedKmh = speed * 3.6;
+
+        ctx.save();
+        // Taustakortti
+        ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(cx - 88, 8, 176, 86, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        // Mittarin kaari (tausta)
+        ctx.lineWidth = 7;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 6, r, Math.PI, 2 * Math.PI);
+        ctx.stroke();
+
+        // Mittarin kaari (aktiivinen nopeus)
+        const frac = Math.min(1, speed / maxSpeed);
+        ctx.strokeStyle = "#2563eb";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 6, r, Math.PI, Math.PI + frac * Math.PI);
+        ctx.stroke();
+
+        // Mittarin viisari
+        const needleAngle = Math.PI + frac * Math.PI;
+        ctx.strokeStyle = "#dc2626";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 6);
+        ctx.lineTo(cx + (r - 6) * Math.cos(needleAngle), cy - 6 + (r - 6) * Math.sin(needleAngle));
+        ctx.stroke();
+
+        ctx.fillStyle = "#0f172a";
+        ctx.beginPath();
+        ctx.arc(cx, cy - 6, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Digitaaliset lukemat (m/s ja km/h)
+        ctx.font = "700 13px ui-monospace, monospace";
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "center";
+        ctx.fillText(fmt(speed, 2) + " m/s", cx, cy + 11);
+
+        ctx.font = "600 10.5px ui-monospace, monospace";
+        ctx.fillStyle = "#475569";
+        ctx.fillText("(" + fmt(speedKmh, 1) + " km/h)", cx, cy + 24);
+
+        ctx.restore();
+      }
+
+      // Piirtää opasteen, kun oppilas raahaa kappaletta (nostotyö W = mgh)
+      function drawDragBanner() {
+        if (!state.isDragging) {
+          // Pieni hienovarainen vihje vasemmassa yläkulmassa
+          ctx.save();
+          ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+          ctx.beginPath();
+          ctx.roundRect(12, 12, 228, 28, 7);
+          ctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "600 11.5px system-ui, sans-serif";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.fillText("✋ Tartu ja raahaa kappaletta radalla", 20, 26);
+          ctx.restore();
+          return;
+        }
+
+        // Raahauksen aikainen pedagoginen viesti
+        const bannerText1 = "Raahaa kappale haluamallesi korkeudelle – teet nostotyötä W = mgh";
+        const bannerText2 = `Korkeus h = ${fmt(state.h, 2)} m  •  Tehty nostotyö W = E_p = ${fmt(state.ep, 1)} J`;
+
+        ctx.save();
+        const bw = Math.min(canvasWidth - 24, 490);
+        const bx = (canvasWidth - bw) / 2;
+        const by = 100;
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, 50, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 12.5px system-ui, sans-serif";
+        ctx.fillText(bannerText1, canvasWidth / 2, by + 18);
+
+        ctx.fillStyle = "#4ade80";
+        ctx.font = "700 12.5px ui-monospace, monospace";
+        ctx.fillText(bannerText2, canvasWidth / 2, by + 36);
+        ctx.restore();
+      }
+
+      function renderCanvas() {
+        const b = getPlotBounds();
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        drawEnvironmentBackground(b);
+        drawGridAndScales(b);
+        drawHeightLines(b);
+        drawTrack(b);
+        drawSelectedMeasurementMarker();
+        drawMovingObject();
+        drawSpeedometer();
+        drawDragBanner();
+      }
+
+      // --- 6. ENERGIAPALKKIEN JA MITTARITAULUN PÄIVITYS ---
+      function updateDashboardUI() {
+        const speed = Math.abs(state.v);
+        const speedKmh = speed * 3.6;
+
+        // Numeerinen mittaritaulu
+        valHeight.textContent = fmt(state.h, 2) + " m";
+        valPosX.textContent = "x = " + fmt(state.x, 2) + " m";
+        valSpeedMs.textContent = fmt(speed, 2) + " m/s";
+        valSpeedKmh.textContent = fmt(speedKmh, 1) + " km/h";
+
+        const decimals = state.etot < 10 ? 2 : 1;
+        valEp.textContent = fmt(state.ep, decimals) + " J";
+        valEk.textContent = fmt(state.ek, decimals) + " J";
+        valEth.textContent = fmt(state.eth, decimals) + " J";
+        valEtot.textContent = fmt(state.etot, decimals) + " J";
+        valTime.textContent = "t = " + fmt(state.t, 2) + " s";
+
+        // Pylväsdiagrammien arvot
+        barValEp.textContent = fmt(state.ep, 1) + " J";
+        barValEk.textContent = fmt(state.ek, 1) + " J";
+        barValEth.textContent = fmt(state.eth, 1) + " J";
+        barValEtot.textContent = fmt(state.etot, 1) + " J";
+
+        // Pylväiden korkeus suhteessa kokonaisenergiaan (tai maksimiasteikkoon, jolloin E_kok pysyy vakiokorkuisena referenssinä)
+        if (state.etot > 1e-6) {
+          const pctEp = Math.min(100, Math.max(0, (state.ep / state.etot) * 100));
+          const pctEk = Math.min(100, Math.max(0, (state.ek / state.etot) * 100));
+          const pctEth = Math.min(100, Math.max(0, (state.eth / state.etot) * 100));
+
+          barFillEp.style.height = pctEp + "%";
+          barFillEk.style.height = pctEk + "%";
+          barFillEth.style.height = pctEth + "%";
+          barFillEtot.style.height = "100%";
+
+          stackEp.style.width = pctEp + "%";
+          stackEk.style.width = pctEk + "%";
+          stackEth.style.width = pctEth + "%";
+          stackedPercentText.textContent = "E_kok = " + fmt(state.etot, 1) + " J (100 %)";
+        } else {
+          barFillEp.style.height = "0%";
+          barFillEk.style.height = "0%";
+          barFillEth.style.height = "0%";
+          barFillEtot.style.height = "0%";
+
+          stackEp.style.width = "0%";
+          stackEk.style.width = "0%";
+          stackEth.style.width = "0%";
+          stackedPercentText.textContent = "E_kok = 0,0 J";
+        }
+      }
+
+      // --- 7. POINTER EVENTS (HIIRELLÄ JA KOSKETUKSELLA RAAHAAMINEN) ---
+      function handlePointerMoveOnCanvas(clientX) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = clientX - rect.left;
+        const wx = screenToWorldX(sx);
+
+        state.initialX = wx;
+        state.initialH = TRACK_A * wx * wx;
+        state.selectedMeasurementId = null;
+        initEnergiesFromRest(wx);
+        updateDashboardUI();
+        renderCanvas();
+      }
+
+      canvas.addEventListener("pointerdown", function(e) {
+        state.isDragging = true;
+        canvas.setPointerCapture(e.pointerId);
+        handlePointerMoveOnCanvas(e.clientX);
+      });
+
+      canvas.addEventListener("pointermove", function(e) {
+        if (!state.isDragging) return;
+        handlePointerMoveOnCanvas(e.clientX);
+      });
+
+      function endDrag(e) {
+        if (!state.isDragging) return;
+        state.isDragging = false;
+        try {
+          canvas.releasePointerCapture(e.pointerId);
+        } catch (_) {}
+        renderCanvas();
+      }
+
+      canvas.addEventListener("pointerup", endDrag);
+      canvas.addEventListener("pointercancel", endDrag);
+
+      // --- 8. KÄYTTÖLIITTYMÄN TAPAHTUMANKÄSITTELIJÄT ---
+      function updatePlayPauseButtonUI() {
+        if (state.running) {
+          playPauseIcon.textContent = "⏸";
+          playPauseText.textContent = "Pysäytä";
+        } else {
+          playPauseIcon.textContent = "▶";
+          playPauseText.textContent = "Käynnistä";
+        }
+      }
+
+      btnPlayPause.addEventListener("click", function() {
+        state.running = !state.running;
+        updatePlayPauseButtonUI();
+      });
+
+      btnStep.addEventListener("click", function() {
+        // Pysäytetään automaattinen toisto ja edetään tasan +0,05 s
+        state.running = false;
+        updatePlayPauseButtonUI();
+        stepPhysics(0.05);
+        updateDashboardUI();
+        renderCanvas();
+      });
+
+      btnReset.addEventListener("click", function() {
+        state.selectedMeasurementId = null;
+        initEnergiesFromRest(state.initialX);
+        updateDashboardUI();
+        renderCanvas();
+      });
+
+      speedPills.forEach(pill => {
+        pill.addEventListener("click", function() {
+          speedPills.forEach(p => p.classList.remove("active"));
+          this.classList.add("active");
+          state.timeScale = parseFloat(this.dataset.speed);
+        });
+      });
+
+      // Näyttövalinnat
+      chkVelocityVec.addEventListener("change", function() {
+        state.showVelocityVec = this.checked;
+        renderCanvas();
+      });
+      chkMaxHeightLine.addEventListener("change", function() {
+        state.showMaxHeightLine = this.checked;
+        renderCanvas();
+      });
+      chkHeightLine.addEventListener("change", function() {
+        state.showHeightLine = this.checked;
+        renderCanvas();
+      });
+      selectObjectType.addEventListener("change", function() {
+        state.objectType = this.value;
+        renderCanvas();
+      });
+
+      // Massa-liukusäädin
+      sliderMass.addEventListener("input", function() {
+        state.m = parseFloat(this.value);
+        badgeMass.textContent = fmt(state.m, 1) + " kg";
+        recalculateEnergiesOnParamChange();
+        updateDashboardUI();
+        renderCanvas();
+      });
+
+      // Kitka-liukusäädin ja pikavalinnat
+      function updateFrictionUI(val) {
+        state.friction = val;
+        sliderFriction.value = val;
+        let desc = "Ei kitkaa";
+        if (val > 0 && val <= 0.6) desc = "Hyvin pieni kitka";
+        else if (val > 0.6 && val <= 1.35) desc = "Pieni kitka";
+        else if (val > 1.35) desc = "Suuri kitka";
+        badgeFriction.textContent = fmt(val, 2) + " (" + desc + ")";
+
+        frictionPresetBtns.forEach(btn => {
+          const bVal = parseFloat(btn.dataset.friction);
+          btn.classList.toggle("active", Math.abs(bVal - val) < 0.03);
+        });
+        renderCanvas();
+      }
+
+      sliderFriction.addEventListener("input", function() {
+        updateFrictionUI(parseFloat(this.value));
+      });
+
+      frictionPresetBtns.forEach(btn => {
+        btn.addEventListener("click", function() {
+          updateFrictionUI(parseFloat(this.dataset.friction));
+        });
+      });
+
+      // Putoamiskiihtyvyyden valintapainikkeet
+      gravityBtns.forEach(btn => {
+        btn.addEventListener("click", function() {
+          gravityBtns.forEach(b => b.classList.remove("active"));
+          this.classList.add("active");
+          state.g = parseFloat(this.dataset.g);
+          state.env = this.dataset.env;
+          badgeGravity.textContent = fmt(state.g, 1) + " m/s²";
+          recalculateEnergiesOnParamChange();
+          updateDashboardUI();
+          renderCanvas();
+        });
+      });
+
+      // --- 9. PEDAGOGINEN MITTAUSTAULUKKO ---
+      function recordMeasurementPoint() {
+        const nextId = state.measurements.length + 1;
+        const point = {
+          id: nextId,
+          t: state.t,
+          x: state.x,
+          h: state.h,
+          v: Math.abs(state.v),
+          ep: state.ep,
+          ek: state.ek,
+          eth: state.eth,
+          etot: state.etot
+        };
+        state.measurements.push(point);
+        state.selectedMeasurementId = point.id;
+        renderMeasurementTable();
+        renderCanvas();
+      }
+
+      function renderMeasurementTable() {
+        measurementTableBody.innerHTML = "";
+        if (state.measurements.length === 0) {
+          emptyTableMessage.style.display = "block";
+          return;
+        }
+        emptyTableMessage.style.display = "none";
+
+        state.measurements.forEach(row => {
+          const tr = document.createElement("tr");
+          if (row.id === state.selectedMeasurementId) {
+            tr.className = "selected-row";
+          }
+          tr.innerHTML = `
+            <td><strong>#${row.id}</strong></td>
+            <td>${fmt(row.t, 2)}</td>
+            <td>${fmt(row.h, 2)}</td>
+            <td>${fmt(row.v, 2)}</td>
+            <td style="color:var(--color-ep); font-weight:600;">${fmt(row.ep, 1)}</td>
+            <td style="color:var(--color-ek); font-weight:600;">${fmt(row.ek, 1)}</td>
+            <td style="color:var(--color-eth); font-weight:600;">${fmt(row.eth, 1)}</td>
+            <td style="font-weight:700;">${fmt(row.etot, 1)}</td>
+          `;
+          tr.addEventListener("click", function() {
+            state.selectedMeasurementId = row.id;
+            renderMeasurementTable();
+            renderCanvas();
+          });
+          measurementTableBody.appendChild(tr);
+        });
+      }
+
+      btnRecordQuick.addEventListener("click", recordMeasurementPoint);
+      btnRecordTable.addEventListener("click", recordMeasurementPoint);
+
+      btnClearTable.addEventListener("click", function() {
+        state.measurements = [];
+        state.selectedMeasurementId = null;
+        renderMeasurementTable();
+        renderCanvas();
+      });
+
+      btnCopyTable.addEventListener("click", function() {
+        const headers = ["Mittaus #", "Aika t (s)", "Korkeus h (m)", "Nopeus v (m/s)", "Ep (J)", "Ek (J)", "Elämpö (J)", "Ekok (J)"];
+        const lines = [headers.join("\t")];
+        state.measurements.forEach(r => {
+          lines.push([
+            r.id,
+            fmt(r.t, 2),
+            fmt(r.h, 2),
+            fmt(r.v, 2),
+            fmt(r.ep, 2),
+            fmt(r.ek, 2),
+            fmt(r.eth, 2),
+            fmt(r.etot, 2)
+          ].join("\t"));
+        });
+
+        const text = lines.join("\n");
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          copyToast.classList.add("visible");
+          setTimeout(() => copyToast.classList.remove("visible"), 2200);
+        } catch (_) {}
+        document.body.removeChild(ta);
+      });
+
+      // --- 10. ANIMAATIOSILMUKKA (requestAnimationFrame) ---
+      let lastFrameTime = performance.now();
+
+      function animate(now) {
+        const rawDt = (now - lastFrameTime) / 1000;
+        lastFrameTime = now;
+
+        // Rajoitetaan maksimiaika-askel (esim. välilehden vaihdon jälkeen)
+        const clampedDt = Math.min(0.05, Math.max(0, rawDt));
+
+        if (state.running && !state.isDragging) {
+          stepPhysics(clampedDt * state.timeScale);
+          updateDashboardUI();
+          renderCanvas();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      window.onload = function() {
+        resizeCanvas();
+        updateDashboardUI();
+        renderMeasurementTable();
+        lastFrameTime = performance.now();
+        requestAnimationFrame(animate);
+      };
+    })();
+  </script>
+</body>
+</html>

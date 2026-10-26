@@ -1,0 +1,2959 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yksinkertaiset koneet ja mekaniikan kultainen sääntö – 8. lk Fysiikka</title>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+
+      --load-blue: #2563eb;
+      --load-blue-soft: #dbeafe;
+      --load-blue-border: #93c5fd;
+
+      --effort-red: #dc2626;
+      --effort-red-soft: #fee2e2;
+      --effort-red-border: #fca5a5;
+
+      --gold-green: #16a34a;
+      --gold-green-soft: #dcfce7;
+      --gold-green-border: #86efac;
+
+      --warn-amber: #d97706;
+      --warn-amber-soft: #fef3c7;
+      --warn-amber-border: #fde68a;
+
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.45;
+      padding: 14px;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Header & Mode Navigation */
+    header.app-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title-group h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-badge {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .header-title-group p {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      margin-top: 3px;
+    }
+
+    .formula-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .formula-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      color: #f8fafc;
+    }
+
+    .formula-pill strong {
+      color: #38bdf8;
+      font-family: var(--font-mono);
+    }
+
+    /* Top Mode Tabs (4 modes) */
+    .top-mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    @media (max-width: 980px) {
+      .top-mode-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-mode-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mode-tab-btn {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid transparent;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .mode-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #ffffff;
+    }
+
+    .mode-tab-btn.active {
+      background: var(--load-blue);
+      color: #ffffff;
+      border-color: #60a5fa;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.32fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 1120px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .card-title {
+      font-size: 1.04rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Canvas */
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      background: #0f172a;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    #simCanvas {
+      display: block;
+      width: 100%;
+      height: 440px;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    #simCanvas:active {
+      cursor: grabbing;
+    }
+
+    .canvas-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      font-size: 0.82rem;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* Golden Rule & Moments Comparison Panel */
+    .golden-panel {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .golden-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .golden-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .golden-box {
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+      border: 2px solid transparent;
+    }
+
+    .golden-box.load-box {
+      background: #eff6ff;
+      border-color: var(--load-blue-border);
+    }
+
+    .golden-box.effort-box {
+      background: #fef2f2;
+      border-color: var(--effort-red-border);
+    }
+
+    .golden-box-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .load-box .golden-box-title {
+      color: #1d4ed8;
+    }
+
+    .effort-box .golden-box-title {
+      color: #b91c1c;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px dashed rgba(15, 23, 42, 0.12);
+      font-size: 0.88rem;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+      padding-top: 8px;
+      margin-top: 2px;
+      border-top: 2px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 1.02rem;
+    }
+
+    .work-highlight {
+      font-size: 1.15rem;
+    }
+
+    .golden-status-bar {
+      background: var(--gold-green-soft);
+      border: 2px solid var(--gold-green-border);
+      color: #14532d;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .golden-status-bar.friction-mode {
+      background: var(--warn-amber-soft);
+      border-color: var(--warn-amber-border);
+      color: #78350f;
+    }
+
+    .golden-status-title {
+      font-weight: 800;
+      font-size: 0.94rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .golden-equation {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.65);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      margin-top: 3px;
+    }
+
+    /* Controls Stack */
+    .controls-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .control-item {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      padding: 10px 13px;
+      border-radius: var(--radius-md);
+    }
+
+    .control-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .control-sub {
+      font-size: 0.77rem;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    .control-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: var(--load-blue);
+      background: var(--load-blue-soft);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .control-value.red {
+      color: var(--effort-red);
+      background: var(--effort-red-soft);
+    }
+
+    .control-value.green {
+      color: var(--gold-green);
+      background: var(--gold-green-soft);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--load-blue);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .pull-slider-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #fef2f2 100%);
+      border: 2px solid #93c5fd;
+    }
+
+    /* Sub-options for specific machines */
+    .pulley-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 6px;
+    }
+
+    .sub-btn {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .sub-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .sub-btn.active {
+      background: var(--load-blue);
+      color: #ffffff;
+      border-color: var(--load-blue);
+    }
+
+    .sub-btn small {
+      display: block;
+      font-weight: 400;
+      font-size: 0.73rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    button.action-btn {
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    button.action-btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--load-blue);
+      color: #ffffff;
+      flex: 1;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-success {
+      background: var(--gold-green);
+      color: #ffffff;
+      width: 100%;
+    }
+    .btn-success:hover {
+      background: #15803d;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Data Table Section */
+    .table-scroll {
+      overflow-x: auto;
+      max-height: 270px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2) {
+      text-align: left;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .empty-row td {
+      text-align: center !important;
+      color: var(--text-light);
+      padding: 22px;
+      font-style: italic;
+    }
+
+    .toast-msg {
+      font-size: 0.8rem;
+      color: var(--gold-green);
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .toast-msg.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- YLÄPALKIN OTSIKKO, KAAVAT JA NELJÄ TILAVÄLILEHTEÄ -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="header-title-group">
+          <h1>
+            ⚖️ Yksinkertaiset koneet ja mekaniikan kultainen sääntö
+            <span class="header-badge">8. lk Fysiikka</span>
+          </h1>
+          <p>"Mikä voimassa voitetaan, se matkassa hävitään" — yksinkertaiset koneet ja momenttien tasapainoehto</p>
+        </div>
+        <div class="formula-bar">
+          <div class="formula-pill">Mekaaninen työ: <strong>W = F · s = G · h</strong></div>
+          <div class="formula-pill">Vipunosto: <strong>F = G · (s₁ / s₂)</strong></div>
+          <div class="formula-pill">Talja: <strong>F = G / n, s = n · h</strong></div>
+          <div class="formula-pill">Tasapainoehto: <strong>M₁ = M₂ (m₁·d₁ = m₂·d₂)</strong></div>
+        </div>
+      </div>
+
+      <nav class="top-mode-tabs" aria-label="Valitse yksinkertainen kone">
+        <button type="button" class="mode-tab-btn active" data-mode="lever">
+          1. Vipuvarsi (Nostokone)
+        </button>
+        <button type="button" class="mode-tab-btn" data-mode="pulley">
+          2. Väkipyörät ja talja
+        </button>
+        <button type="button" class="mode-tab-btn" data-mode="incline">
+          3. Kalteva taso
+        </button>
+        <button type="button" class="mode-tab-btn" data-mode="balance">
+          4. Tasapainolauta
+        </button>
+      </nav>
+    </header>
+
+    <!-- PÄÄALUE: VASEN (CANVAS + VERTAILUPANEELI) | OIKEA (OHJAUSPANEELI) -->
+    <div class="main-grid">
+      <!-- VASEN SARAKE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" id="canvasTitle">
+            <span>🔬 Tila 1: Vipuvarsi nostokoneena – suoran noston ja vipunoston vertailu</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <label class="checkbox-row">
+              <input type="checkbox" id="chkShowDims" checked />
+              Näytä voimavektorit ja mitat
+            </label>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="simCanvas" width="840" height="440"></canvas>
+        </div>
+
+        <div class="canvas-legend">
+          <div class="legend-items" id="legendItemsBox">
+            <span><i class="legend-dot" style="background:#3b82f6"></i><strong>Sininen vektori (G₁):</strong> Kuorman paino (N)</span>
+            <span><i class="legend-dot" style="background:#ef4444"></i><strong>Punainen vektori (F₂):</strong> Käyttäjän painallus-/vetovoima (N)</span>
+            <span><i class="legend-dot" style="background:#22c55e"></i><strong>Mitat h₁ ja s₂:</strong> Kuorman nousu (m) ja työntö-/vetomatka (m)</span>
+          </div>
+          <span style="color:var(--text-muted); font-weight:600;" id="canvasHintText">
+            💡 Vinkki: Paina vivun oikeaa päätä alas liukusäätimellä tai suoraan hiirellä!
+          </span>
+        </div>
+
+        <!-- B. MEKANIIKAN KULTAISEN SÄÄNNÖN JA MOMENTTIEN VERTAILUPANEELI -->
+        <div class="golden-panel">
+          <div class="golden-cards">
+            <!-- VASEN LAATIKKO: KUORMA TAI VASEN MOMENTTI -->
+            <div class="golden-box load-box">
+              <div class="golden-box-title">
+                <span id="leftBoxTitle">📦 Kuorma (Mitä halutaan tehdä)</span>
+                <span id="badgeMass">m = 20 kg</span>
+              </div>
+              <div class="metric-row">
+                <span id="leftRow1Label">Kuorman paino <strong>G = m · g</strong>:</span>
+                <span class="metric-val" id="valLoadG" style="color:#1d4ed8">196,0 N</span>
+              </div>
+              <div class="metric-row">
+                <span id="leftRow2Label">Nostokorkeus <strong>h₁</strong> (hetkellinen / tavoite):</span>
+                <span class="metric-val" id="valLoadH">1,50 m / 1,50 m</span>
+              </div>
+              <div class="metric-row">
+                <span id="leftRow3Label">Hyötytyö <strong>W<sub>nosto</sub> = G · h₁</strong>:</span>
+                <span class="metric-val work-highlight" id="valWorkUseful" style="color:#1d4ed8">294,0 J</span>
+              </div>
+            </div>
+
+            <!-- OIKEA LAATIKKO: KÄYTTÄJÄ / KONE TAI OIKEA MOMENTTI -->
+            <div class="golden-box effort-box">
+              <div class="golden-box-title">
+                <span id="rightBoxTitle">🖐️ Käyttäjä / Kone (Miten se tehdään)</span>
+                <span id="badgeAdvantage">Välitys 3,0 : 1</span>
+              </div>
+              <div class="metric-row">
+                <span id="rightRow1Label">Tarvittava voima <strong>F</strong>:</span>
+                <span class="metric-val" id="valEffortF" style="color:#b91c1c">65,3 N</span>
+              </div>
+              <div class="metric-row">
+                <span id="rightRow2Label">Vaadittu matka <strong>s₂</strong> (hetkellinen / tavoite):</span>
+                <span class="metric-val" id="valEffortS">4,50 m / 4,50 m</span>
+              </div>
+              <div class="metric-row">
+                <span id="rightRow3Label">Tehty työ <strong>W<sub>käytetty</sub> = F · s₂</strong>:</span>
+                <span class="metric-val work-highlight" id="valWorkInput" style="color:#b91c1c">294,0 J</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KULTAISEN SÄÄNNÖN / TASAPAINOEHDON TILAPALKKI -->
+          <div class="golden-status-bar" id="goldenStatusBar">
+            <div class="golden-status-title">
+              <span id="goldenStatusTitle">✅ Mekaniikan kultainen sääntö toteutuu: Työtä ei säästy!</span>
+              <span id="goldenEfficiencyBadge">Hyötysuhde η = 100 %</span>
+            </div>
+            <div class="golden-equation" id="goldenEquationText">
+              Voimasuhde G / F = 3,00  =  Matkasuhde s₂ / h₁ = 3,00   ⇒   W_käytetty (294 J) = W_nosto (294 J)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OIKEA SARAKE: OHJAUSPANEELI -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎛️ Ohjauspaneeli ja suureiden säätö</div>
+        </div>
+
+        <div class="controls-stack">
+          <!-- YHTEISET SÄÄDÖT TILOILLE 1-3 (Massa m ja Nostokorkeus h) -->
+          <div id="commonWorkControls" class="controls-stack">
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Kuorman massa (m)</span>
+                  <span class="control-sub" id="lblWeightHint">Paino G = 196,0 N (g = 9,8 m/s²)</span>
+                </div>
+                <span class="control-value" id="lblMassVal">20 kg</span>
+              </div>
+              <input type="range" id="rngMass" min="1" max="100" step="1" value="20" />
+            </div>
+
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Tavoiteltu nostokorkeus (h₁)</span>
+                  <span class="control-sub">Kuinka korkealle kuorma nostetaan maasta</span>
+                </div>
+                <span class="control-value" id="lblHeightVal">1,5 m</span>
+              </div>
+              <input type="range" id="rngHeight" min="0.5" max="5.0" step="0.1" value="1.5" />
+            </div>
+          </div>
+
+          <!-- KONEKOHTAISET SÄÄDÖT: TILA 1 (VIPUVARSI NOSTOKONEENA) -->
+          <div id="controlsLever" class="controls-stack">
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Kuorman varsi (s₁)</span>
+                  <span class="control-sub">Etäisyys tukipisteestä kuormaan</span>
+                </div>
+                <span class="control-value" id="lblLeverS1">1,0 m</span>
+              </div>
+              <input type="range" id="rngLeverS1" min="0.5" max="4.0" step="0.25" value="1.0" />
+            </div>
+
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Voiman varsi (s₂)</span>
+                  <span class="control-sub">Etäisyys tukipisteestä käden painalluspisteeseen</span>
+                </div>
+                <span class="control-value red" id="lblLeverS2">3,0 m</span>
+              </div>
+              <input type="range" id="rngLeverS2" min="0.5" max="4.0" step="0.25" value="3.0" />
+            </div>
+
+            <div class="control-item" style="background:#f8fafc;">
+              <div style="font-size:0.82rem; color:var(--text-muted); display:flex; flex-direction:column; gap:4px;">
+                <div><strong>Suora nosto (ilman vipua):</strong> <span id="lblDirectLiftInfo" style="font-family:var(--font-mono); color:#1d4ed8; font-weight:700;">F_suora = 196,0 N</span></div>
+                <div><strong>Vipunosto (s₁ : s₂):</strong> <span id="lblLeverLiftInfo" style="font-family:var(--font-mono); color:#b91c1c; font-weight:700;">F = 65,3 N (matka s₂ = 4,50 m)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KONEKOHTAISET SÄÄDÖT: TILA 2 (VÄKIPYÖRÄT JA TALJA) -->
+          <div id="controlsPulley" class="controls-stack hidden">
+            <div class="control-item">
+              <div class="control-top">
+                <span class="control-label">Valitse nostolaitteisto (Välityssuhde)</span>
+                <span class="control-value" id="lblPulleyRopes">n = 1 köysi</span>
+              </div>
+              <div class="pulley-grid">
+                <button type="button" class="sub-btn pulley-type-btn" data-ptype="direct">
+                  1. Suora nosto (1:1)
+                  <small>F = G, vetomatka s = h</small>
+                </button>
+                <button type="button" class="sub-btn pulley-type-btn active" data-ptype="fixed">
+                  2. Kiinteä väkipyörä (1:1)
+                  <small>Suunta kääntyy, F = G, s = h</small>
+                </button>
+                <button type="button" class="sub-btn pulley-type-btn" data-ptype="movable">
+                  3. Liikkuva väkipyörä (2:1)
+                  <small>2 köyttä: F = G/2, s = 2h</small>
+                </button>
+                <button type="button" class="sub-btn pulley-type-btn" data-ptype="tackle4">
+                  4. Nelipyöräinen talja (4:1)
+                  <small>4 köyttä: F = G/4, s = 4h</small>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KONEKOHTAISET SÄÄDÖT: TILA 3 (KALTEVA TASO) -->
+          <div id="controlsIncline" class="controls-stack hidden">
+            <div class="control-item">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Luiskan pituus (L)</span>
+                  <span class="control-sub" id="lblInclineAngle">Nousukulma α = 17,5°</span>
+                </div>
+                <span class="control-value red" id="lblRampLenVal">5,0 m</span>
+              </div>
+              <input type="range" id="rngRampLen" min="1.0" max="12.0" step="0.2" value="5.0" />
+            </div>
+
+            <div class="control-item">
+              <div class="control-top">
+                <label class="checkbox-row">
+                  <input type="checkbox" id="chkInclineFriction" />
+                  Ota kitka mukaan (F<sub>μ</sub> = μ · m · g · cos α)
+                </label>
+                <span class="control-value red hidden" id="lblMuVal">μ = 0,20</span>
+              </div>
+              <div id="inclineFrictionBox" class="hidden" style="margin-top:6px;">
+                <input type="range" id="rngMu" min="0.05" max="0.50" step="0.05" value="0.20" />
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;" id="lblFrictionWorkNote">
+                  Kitkavoima Fμ = 37,5 N ⇒ Kitkatyö W_kitka = 187 J
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KONEKOHTAISET SÄÄDÖT: TILA 4 (TASAPAINOLAUTA JA MOMENTIT) -->
+          <div id="controlsBalance" class="controls-stack hidden">
+            <!-- Vasen punnus m1 ja d1 -->
+            <div class="control-item" style="border-left: 4px solid var(--load-blue);">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Vasen massa (m₁)</span>
+                  <span class="control-sub" id="lblBalG1">Paino G₁ = 196,0 N</span>
+                </div>
+                <span class="control-value" id="lblBalM1">20 kg</span>
+              </div>
+              <input type="range" id="rngBalM1" min="1" max="50" step="1" value="20" />
+
+              <div class="control-top" style="margin-top:10px;">
+                <div>
+                  <span class="control-label">Vasen etäisyys tukipisteestä (d₁)</span>
+                  <span class="control-sub">Metripykälä vasemmalla (0,5 – 4,0 m)</span>
+                </div>
+                <span class="control-value" id="lblBalD1">2,0 m</span>
+              </div>
+              <input type="range" id="rngBalD1" min="0.5" max="4.0" step="0.25" value="2.0" />
+            </div>
+
+            <!-- Oikea punnus m2 ja d2 -->
+            <div class="control-item" style="border-left: 4px solid var(--effort-red);">
+              <div class="control-top">
+                <div>
+                  <span class="control-label">Oikea massa (m₂)</span>
+                  <span class="control-sub" id="lblBalG2">Paino G₂ = 98,0 N</span>
+                </div>
+                <span class="control-value red" id="lblBalM2">10 kg</span>
+              </div>
+              <input type="range" id="rngBalM2" min="1" max="50" step="1" value="10" />
+
+              <div class="control-top" style="margin-top:10px;">
+                <div>
+                  <span class="control-label">Oikea etäisyys tukipisteestä (d₂)</span>
+                  <span class="control-sub">Metripykälä oikealla (0,5 – 4,0 m)</span>
+                </div>
+                <span class="control-value red" id="lblBalD2">4,0 m</span>
+              </div>
+              <input type="range" id="rngBalD2" min="0.5" max="4.0" step="0.25" value="4.0" />
+            </div>
+
+            <!-- Ratkaise tasapaino -apupainikkeet -->
+            <div class="control-item" style="background:linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border-color:#86efac;">
+              <div class="control-label" style="margin-bottom:6px;">⚖️ Pedagoginen aputyökalu: Ratkaise tasapaino</div>
+              <div class="btn-row">
+                <button type="button" id="btnSolveBalDist" class="action-btn btn-primary btn-sm">
+                  🎯 Tasapainota etäisyydellä d₂
+                </button>
+                <button type="button" id="btnSolveBalMass" class="action-btn btn-secondary btn-sm">
+                  ⚖️ Tasapainota massalla m₂
+                </button>
+              </div>
+              <div class="pulley-grid" style="margin-top:8px;">
+                <button type="button" class="sub-btn bal-preset-btn" data-m1="15" data-d1="2" data-m2="15" data-d2="2">
+                  Symmetrinen (1:1)
+                  <small>15 kg · 2 m = 15 kg · 2 m</small>
+                </button>
+                <button type="button" class="sub-btn bal-preset-btn" data-m1="20" data-d1="1.5" data-m2="10" data-d2="3">
+                  Kaksinkertainen varsi (1:2)
+                  <small>20 kg · 1,5 m = 10 kg · 3,0 m</small>
+                </button>
+                <button type="button" class="sub-btn bal-preset-btn" data-m1="40" data-d1="1" data-m2="10" data-d2="4">
+                  Neljäsosamassa (1:4)
+                  <small>40 kg · 1,0 m = 10 kg · 4,0 m</small>
+                </button>
+                <button type="button" class="sub-btn bal-preset-btn" data-m1="25" data-d1="2.5" data-m2="15" data-d2="2">
+                  Epätasapaino (Testaa!)
+                  <small>M₁ > M₂ (kallistuu vasemmalle)</small>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTERAKTIIVINEN NOSTOSÄÄDIN JA PAINIKKEET (TILOILLE 1-3) -->
+          <div id="workLiftControls" class="controls-stack">
+            <div class="control-item pull-slider-box">
+              <div class="control-top">
+                <div>
+                  <span class="control-label" id="lblPullSliderTitle">🖐️ Paina vivun oikeaa päätä alas (0 % → 100 %)</span>
+                  <span class="control-sub">0 % = kuorma maassa (h₁ = 0 m) | 100 % = kuorma nostettu</span>
+                </div>
+                <span class="control-value green" id="lblProgressPct">0 %</span>
+              </div>
+              <input type="range" id="rngProgress" min="0" max="100" step="1" value="0" />
+            </div>
+
+            <div class="btn-row">
+              <button type="button" id="btnAutoLift" class="action-btn btn-primary">
+                ▶ Nosta automaattisesti
+              </button>
+              <button type="button" id="btnResetDown" class="action-btn btn-secondary">
+                ↺ Palauta maahan (0 m)
+              </button>
+            </div>
+          </div>
+
+          <button type="button" id="btnRecord" class="action-btn btn-success">
+            ＋ Tallenna mittauspiste taulukkoon
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- D. MITTAUSTAULUKKO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" id="tableTitle">
+          📋 Kokeellinen mittaustaulukko (Mekaniikan kultainen sääntö & Momenttien tasapainoehto)
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span id="copyToast" class="toast-msg">✓ Taulukko kopioitu leikepöydälle!</span>
+          <button type="button" id="btnCopyTable" class="action-btn btn-secondary btn-sm">
+            📋 Kopioi taulukko leikepöydälle
+          </button>
+          <button type="button" id="btnClearTable" class="action-btn btn-secondary btn-sm">
+            🗑️ Tyhjennä taulukko
+          </button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const G_ACCEL = 9.8; // m/s²
+
+      // Sovelluksen keskitetty tila
+      const state = {
+        mode: "lever",             // 'lever' | 'pulley' | 'incline' | 'balance'
+        mass: 20,                  // kg (1 - 100)
+        targetHeight: 1.5,         // h1 (0.5 - 5.0 m)
+        progress: 0.0,             // 0.0 (kuorma maassa h1 = 0 m) ... 1.0 (nostettu korkeudelle h1)
+        showDims: true,
+
+        // Tila 1: Vipuvarsi nostokoneena
+        leverS1: 1.0,              // Kuorman varsi s1 (m)
+        leverS2: 3.0,              // Voiman varsi s2 (m)
+
+        // Tila 2: Väkipyörät ja talja
+        pulleyType: "fixed",       // 'direct' | 'fixed' | 'movable' | 'tackle4'
+
+        // Tila 3: Kalteva taso
+        rampLength: 5.0,           // L (m)
+        inclineFrictionOn: false,
+        mu: 0.20,                  // kitkakerroin
+
+        // Tila 4: Tasapainolauta ja momentit
+        balM1: 20,                 // Vasen massa m1 (kg)
+        balD1: 2.0,                // Vasen etäisyys tukipisteestä d1 (m)
+        balM2: 10,                 // Oikea massa m2 (kg)
+        balD2: 4.0,                // Oikea etäisyys tukipisteestä d2 (m)
+        balCurrentAngle: 0,        // Nykyinen kulma (rad, animoitu)
+
+        // Animaatio & raahaus
+        animating: false,
+        lastTime: 0,
+        dragging: false,
+        dragTarget: null,          // 'progress' | 'balLeft' | 'balRight'
+        dragStartY: 0,
+        dragStartX: 0,
+        dragStartProgress: 0,
+
+        // Mittaustaulukot (Tiloille 1-3 sekä Tilalle 4)
+        measurementsWork: [],
+        measurementsBalance: []
+      };
+
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Suomalainen desimaalimuotoilu
+      function fmt(num, decimals = 1) {
+        return Number(num).toFixed(decimals).replace(".", ",");
+      }
+
+      // Laskee Tilan 4 (Tasapainolauta) suureet
+      function computeBalance() {
+        const G1 = state.balM1 * G_ACCEL;
+        const G2 = state.balM2 * G_ACCEL;
+        const M1 = G1 * state.balD1; // Vasen momentti (vastapäivään, Nm)
+        const M2 = G2 * state.balD2; // Oikea momentti (myötäpäivään, Nm)
+        const prod1 = state.balM1 * state.balD1; // kg·m
+        const prod2 = state.balM2 * state.balD2; // kg·m
+
+        const maxM = Math.max(M1, M2, 1);
+        const relDiff = Math.abs(M1 - M2) / maxM;
+        const isBalanced = relDiff < 0.01;
+
+        let statusText = "TASAPAINOSSA! (M₁ = M₂)";
+        let targetAngle = 0;
+        const maxStopperAngle = 0.19; // rad (osuu pehmeästi rajoittimeen)
+
+        if (!isBalanced) {
+          if (M1 > M2) {
+            statusText = "Kallellaan vasemmalle (M₁ > M₂)";
+            targetAngle = -maxStopperAngle;
+          } else {
+            statusText = "Kallellaan oikealle (M₂ > M₁)";
+            targetAngle = maxStopperAngle;
+          }
+        }
+
+        return {
+          m1: state.balM1,
+          d1: state.balD1,
+          G1,
+          M1,
+          prod1,
+          m2: state.balM2,
+          d2: state.balD2,
+          G2,
+          M2,
+          prod2,
+          diffM: Math.abs(M1 - M2),
+          isBalanced,
+          statusText,
+          targetAngle
+        };
+      }
+
+      // Laskee Tilojen 1-3 (Yksinkertaiset nostokoneet) suureet
+      function computeMechanics() {
+        const G = state.mass * G_ACCEL;
+        const hTarget = state.targetHeight;
+        const hNow = hTarget * state.progress;
+        const usefulWorkTarget = G * hTarget;
+        const usefulWorkNow = G * hNow;
+
+        let machineName = "";
+        let mechanicalAdvantage = 1; // s / h
+        let forceRatio = 1;          // G / F
+        let F = G;
+        let sTarget = hTarget;
+        let sNow = hNow;
+        let frictionForce = 0;
+        let frictionWorkTarget = 0;
+        let isFrictionActive = false;
+
+        if (state.mode === "lever") {
+          const ratio = state.leverS2 / state.leverS1;
+          mechanicalAdvantage = ratio;
+          F = G * (state.leverS1 / state.leverS2);
+          forceRatio = ratio;
+          sTarget = hTarget * ratio;
+          sNow = hNow * ratio;
+          machineName = `Vipuvarsi (s₁=${fmt(state.leverS1, 2)} m, s₂=${fmt(state.leverS2, 2)} m)`;
+        } else if (state.mode === "pulley") {
+          let n = 1;
+          if (state.pulleyType === "direct") {
+            n = 1;
+            machineName = "Suora nosto (1:1)";
+          } else if (state.pulleyType === "fixed") {
+            n = 1;
+            machineName = "Kiinteä väkipyörä (1:1)";
+          } else if (state.pulleyType === "movable") {
+            n = 2;
+            machineName = "Liikkuva väkipyörä (2:1)";
+          } else if (state.pulleyType === "tackle4") {
+            n = 4;
+            machineName = "Nelipyöräinen talja (4:1)";
+          }
+          mechanicalAdvantage = n;
+          forceRatio = n;
+          F = G / n;
+          sTarget = hTarget * n;
+          sNow = hNow * n;
+        } else if (state.mode === "incline") {
+          if (state.rampLength < hTarget + 0.2) {
+            state.rampLength = Math.min(12.0, Number((hTarget + 0.5).toFixed(1)));
+            document.getElementById("rngRampLen").value = state.rampLength;
+          }
+          const L = state.rampLength;
+          const sinAlpha = Math.min(1, hTarget / L);
+          const cosAlpha = Math.sqrt(Math.max(0, 1 - sinAlpha * sinAlpha));
+          const idealF = G * sinAlpha;
+
+          if (state.inclineFrictionOn) {
+            isFrictionActive = true;
+            frictionForce = state.mu * G * cosAlpha;
+          }
+          F = idealF + frictionForce;
+          sTarget = L;
+          sNow = L * state.progress;
+          mechanicalAdvantage = L / hTarget;
+          forceRatio = G / F;
+          frictionWorkTarget = frictionForce * L;
+          machineName = state.inclineFrictionOn
+            ? `Kalteva taso (L=${fmt(L, 1)} m, μ=${fmt(state.mu, 2)})`
+            : `Kalteva taso (L=${fmt(L, 1)} m, kitkaton)`;
+        }
+
+        const inputWorkTarget = F * sTarget;
+        const inputWorkNow = F * sNow;
+        const efficiencyPct = inputWorkTarget > 0 ? (usefulWorkTarget / inputWorkTarget) * 100 : 100;
+
+        return {
+          machineName,
+          G,
+          hTarget,
+          hNow,
+          F,
+          sTarget,
+          sNow,
+          usefulWorkTarget,
+          usefulWorkNow,
+          inputWorkTarget,
+          inputWorkNow,
+          mechanicalAdvantage,
+          forceRatio,
+          isFrictionActive,
+          frictionForce,
+          frictionWorkTarget,
+          efficiencyPct
+        };
+      }
+
+      // Päivittää käyttöliittymän tekstit, paneelit ja mittaustaulukon
+      function updateUI() {
+        const titles = {
+          lever: "🔬 Tila 1: Vipuvarsi nostokoneena – suoran noston ja vipunoston vertailu",
+          pulley: "🔬 Tila 2: Väkipyörät ja taljajärjestelmät (F = G / n, s = n · h)",
+          incline: "🔬 Tila 3: Kalteva taso – suoran noston ja luiskan vertailu (F = G · h / L)",
+          balance: "🔬 Tila 4: Tasapainolauta ja momenttien tasapainoehto (M₁ = M₂)"
+        };
+        document.getElementById("canvasTitle").innerHTML = `<span>${titles[state.mode]}</span>`;
+
+        const isBalanceMode = state.mode === "balance";
+        document.getElementById("commonWorkControls").classList.toggle("hidden", isBalanceMode);
+        document.getElementById("workLiftControls").classList.toggle("hidden", isBalanceMode);
+        document.getElementById("controlsLever").classList.toggle("hidden", state.mode !== "lever");
+        document.getElementById("controlsPulley").classList.toggle("hidden", state.mode !== "pulley");
+        document.getElementById("controlsIncline").classList.toggle("hidden", state.mode !== "incline");
+        document.getElementById("controlsBalance").classList.toggle("hidden", !isBalanceMode);
+
+        if (isBalanceMode) {
+          const b = computeBalance();
+
+          document.getElementById("legendItemsBox").innerHTML = `
+            <span><i class="legend-dot" style="background:#3b82f6"></i><strong>Vasen punnus (G₁):</strong> Vastapäivään vääntävä voima</span>
+            <span><i class="legend-dot" style="background:#ef4444"></i><strong>Oikea punnus (G₂):</strong> Myötäpäivään vääntävä voima</span>
+            <span><i class="legend-dot" style="background:#22c55e"></i><strong>Varret d₁ ja d₂:</strong> Etäisyydet tukipisteestä (m)</span>
+          `;
+          document.getElementById("canvasHintText").textContent =
+            "💡 Vinkki: Voit myös raahata punnuksia m₁ ja m₂ suoraan hiirellä laudan metripykäliin!";
+
+          // Säätimien arvot
+          document.getElementById("lblBalM1").textContent = `${b.m1} kg`;
+          document.getElementById("lblBalG1").textContent = `Paino G₁ = ${fmt(b.G1, 1)} N`;
+          document.getElementById("lblBalD1").textContent = `${fmt(b.d1, 2)} m`;
+          document.getElementById("rngBalM1").value = b.m1;
+          document.getElementById("rngBalD1").value = b.d1;
+
+          document.getElementById("lblBalM2").textContent = `${b.m2} kg`;
+          document.getElementById("lblBalG2").textContent = `Paino G₂ = ${fmt(b.G2, 1)} N`;
+          document.getElementById("lblBalD2").textContent = `${fmt(b.d2, 2)} m`;
+          document.getElementById("rngBalM2").value = b.m2;
+          document.getElementById("rngBalD2").value = b.d2;
+
+          // Vertailupaneeli Tilassa 4 (Momentit)
+          document.getElementById("leftBoxTitle").textContent = "🔵 Vasen puoli (Vastapäivään M₁)";
+          document.getElementById("badgeMass").textContent = `m₁ = ${b.m1} kg`;
+          document.getElementById("leftRow1Label").innerHTML = "Painovoima <strong>G₁ = m₁ · g</strong>:";
+          document.getElementById("valLoadG").textContent = `${fmt(b.G1, 1)} N`;
+          document.getElementById("leftRow2Label").innerHTML = "Etäisyys tukipisteestä <strong>d₁</strong>:";
+          document.getElementById("valLoadH").textContent = `${fmt(b.d1, 2)} m`;
+          document.getElementById("leftRow3Label").innerHTML = "Vasen momentti <strong>M₁ = G₁ · d₁</strong>:";
+          document.getElementById("valWorkUseful").textContent =
+            `${fmt(b.M1, 1)} Nm (${fmt(b.prod1, 1)} kg·m)`;
+
+          document.getElementById("rightBoxTitle").textContent = "🔴 Oikea puoli (Myötäpäivään M₂)";
+          document.getElementById("badgeAdvantage").textContent = `m₂ = ${b.m2} kg`;
+          document.getElementById("rightRow1Label").innerHTML = "Painovoima <strong>G₂ = m₂ · g</strong>:";
+          document.getElementById("valEffortF").textContent = `${fmt(b.G2, 1)} N`;
+          document.getElementById("rightRow2Label").innerHTML = "Etäisyys tukipisteestä <strong>d₂</strong>:";
+          document.getElementById("valEffortS").textContent = `${fmt(b.d2, 2)} m`;
+          document.getElementById("rightRow3Label").innerHTML = "Oikea momentti <strong>M₂ = G₂ · d₂</strong>:";
+          document.getElementById("valWorkInput").textContent =
+            `${fmt(b.M2, 1)} Nm (${fmt(b.prod2, 1)} kg·m)`;
+
+          const statusBar = document.getElementById("goldenStatusBar");
+          const statusTitle = document.getElementById("goldenStatusTitle");
+          const effBadge = document.getElementById("goldenEfficiencyBadge");
+          const eqText = document.getElementById("goldenEquationText");
+
+          if (b.isBalanced) {
+            statusBar.classList.remove("friction-mode");
+            statusTitle.textContent = "✅ TASAPAINOSSA! Vastakkaiset momentit kumoavat toisensa (M₁ = M₂)";
+            effBadge.textContent = `m₁ · d₁ = m₂ · d₂ = ${fmt(b.prod1, 1)} kg·m`;
+            eqText.textContent =
+              `M₁ = ${fmt(b.G1, 1)} N · ${fmt(b.d1, 2)} m = ${fmt(b.M1, 1)} Nm   =   M₂ = ${fmt(b.G2, 1)} N · ${fmt(b.d2, 2)} m = ${fmt(b.M2, 1)} Nm`;
+          } else {
+            statusBar.classList.add("friction-mode");
+            const heavierSide = b.M1 > b.M2 ? "vasemmalle (M₁ > M₂)" : "oikealle (M₂ > M₁)";
+            const neededD2 = (b.m1 * b.d1) / b.m2;
+            statusTitle.textContent = `⚠️ EI TASAPAINOSSA: Lauta kallistuu ${heavierSide}!`;
+            effBadge.textContent = `Momenttiero ΔM = ${fmt(b.diffM, 1)} Nm`;
+            eqText.textContent =
+              `M₁ = ${fmt(b.M1, 1)} Nm  ≠  M₂ = ${fmt(b.M2, 1)} Nm   (Tasapaino nykyisellä massalla m₂=${b.m2} kg vaatisi d₂ = ${fmt(neededD2, 2)} m)`;
+          }
+        } else {
+          // TILAT 1-3 (Mekaaninen työ ja kultainen sääntö)
+          const m = computeMechanics();
+
+          document.getElementById("legendItemsBox").innerHTML = `
+            <span><i class="legend-dot" style="background:#3b82f6"></i><strong>Sininen vektori (G₁):</strong> Kuorman paino (N)</span>
+            <span><i class="legend-dot" style="background:#ef4444"></i><strong>Punainen vektori (F₂):</strong> Käyttäjän tekemä voima (N)</span>
+            <span><i class="legend-dot" style="background:#22c55e"></i><strong>Mitat h₁ ja s₂:</strong> Kuorman nousu (m) ja työntö-/vetomatka (m)</span>
+          `;
+          document.getElementById("canvasHintText").textContent =
+            "💡 Vinkki: Voit myös raahata vipua, köyttä tai vaunua suoraan hiirellä!";
+
+          document.getElementById("lblMassVal").textContent = `${state.mass} kg`;
+          document.getElementById("lblWeightHint").textContent = `Paino G = ${fmt(m.G, 1)} N (g = 9,8 m/s²)`;
+          document.getElementById("lblHeightVal").textContent = `${fmt(state.targetHeight, 1)} m`;
+
+          // Vipuvarsi
+          document.getElementById("lblLeverS1").textContent = `${fmt(state.leverS1, 2)} m`;
+          document.getElementById("lblLeverS2").textContent = `${fmt(state.leverS2, 2)} m`;
+          document.getElementById("lblDirectLiftInfo").textContent =
+            `F_suora = G = ${fmt(m.G, 1)} N (matka h₁ = ${fmt(m.hTarget, 2)} m)`;
+          document.getElementById("lblLeverLiftInfo").textContent =
+            `F = ${fmt(m.F, 1)} N (painallusmatka s₂ = ${fmt(m.sTarget, 2)} m)`;
+
+          // Talja
+          const nMap = {
+            direct: "1 (suora)",
+            fixed: "1 köysi (kääntö)",
+            movable: "2 kantavaa köyttä",
+            tackle4: "4 kantavaa köyttä"
+          };
+          document.getElementById("lblPulleyRopes").textContent = nMap[state.pulleyType];
+          document.querySelectorAll(".pulley-type-btn").forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.ptype === state.pulleyType);
+          });
+
+          // Kalteva taso
+          const angleDeg = (Math.asin(Math.min(1, state.targetHeight / state.rampLength)) * 180) / Math.PI;
+          document.getElementById("lblRampLenVal").textContent = `${fmt(state.rampLength, 1)} m`;
+          document.getElementById("lblInclineAngle").textContent = `Nousukulma α = ${fmt(angleDeg, 1)}°`;
+          const fricBox = document.getElementById("inclineFrictionBox");
+          const lblMu = document.getElementById("lblMuVal");
+          if (state.inclineFrictionOn) {
+            fricBox.classList.remove("hidden");
+            lblMu.classList.remove("hidden");
+            lblMu.textContent = `μ = ${fmt(state.mu, 2)}`;
+            document.getElementById("lblFrictionWorkNote").textContent =
+              `Kitkavoima Fμ = ${fmt(m.frictionForce, 1)} N ⇒ Kitkatyö W_kitka = ${fmt(m.frictionWorkTarget, 0)} J`;
+          } else {
+            fricBox.classList.add("hidden");
+            lblMu.classList.add("hidden");
+          }
+
+          // Nostosäädin
+          const sliderTitles = {
+            lever: "🖐️ Paina vivun oikeaa päätä alaspäin (0 % → 100 %)",
+            pulley: "🖐️ Vedä taljan vetoköydestä (0 % → 100 %)",
+            incline: "🖐️ Vedä kuormavaunua luiskaa pitkin (0 % → 100 %)"
+          };
+          document.getElementById("lblPullSliderTitle").textContent = sliderTitles[state.mode];
+          document.getElementById("lblProgressPct").textContent = `${Math.round(state.progress * 100)} %`;
+          document.getElementById("rngProgress").value = Math.round(state.progress * 100);
+
+          // Vertailupaneeli Tiloissa 1-3
+          document.getElementById("leftBoxTitle").textContent = "📦 Kuorma (Mitä halutaan tehdä)";
+          document.getElementById("badgeMass").textContent = `m = ${state.mass} kg`;
+          document.getElementById("leftRow1Label").innerHTML =
+            "Suora nostovoima <strong>F<sub>suora</sub> = G = m · g</strong>:";
+          document.getElementById("valLoadG").textContent = `${fmt(m.G, 1)} N`;
+          document.getElementById("leftRow2Label").innerHTML =
+            "Nostokorkeus <strong>h₁</strong> (hetkellinen / tavoite):";
+          document.getElementById("valLoadH").textContent =
+            `${fmt(m.hNow, 2)} m / ${fmt(m.hTarget, 2)} m`;
+          document.getElementById("leftRow3Label").innerHTML =
+            "Nostotyö <strong>W<sub>nosto</sub> = G · h₁</strong>:";
+          document.getElementById("valWorkUseful").textContent =
+            `${fmt(m.usefulWorkNow, 0)} J (tavoite ${fmt(m.usefulWorkTarget, 0)} J)`;
+
+          document.getElementById("rightBoxTitle").textContent = "🖐️ Käyttäjä / Kone (Miten se tehdään)";
+          document.getElementById("badgeAdvantage").textContent =
+            `Matkasuhde ${fmt(m.mechanicalAdvantage, 2)} : 1`;
+          document.getElementById("rightRow1Label").innerHTML =
+            state.mode === "lever"
+              ? "Painallusvoima <strong>F = G · (s₁ / s₂)</strong>:"
+              : "Tarvittava voima <strong>F</strong>:";
+          document.getElementById("valEffortF").textContent = `${fmt(m.F, 1)} N`;
+          document.getElementById("rightRow2Label").innerHTML =
+            state.mode === "lever"
+              ? "Painallusmatka <strong>s₂</strong> (hetkellinen / tavoite):"
+              : "Vetomatka <strong>s</strong> (hetkellinen / tavoite):";
+          document.getElementById("valEffortS").textContent =
+            `${fmt(m.sNow, 2)} m / ${fmt(m.sTarget, 2)} m`;
+          document.getElementById("rightRow3Label").innerHTML =
+            "Tehty työ <strong>W<sub>käytetty</sub> = F · s₂</strong>:";
+          document.getElementById("valWorkInput").textContent =
+            `${fmt(m.inputWorkNow, 0)} J (tavoite ${fmt(m.inputWorkTarget, 0)} J)`;
+
+          const statusBar = document.getElementById("goldenStatusBar");
+          const statusTitle = document.getElementById("goldenStatusTitle");
+          const effBadge = document.getElementById("goldenEfficiencyBadge");
+          const eqText = document.getElementById("goldenEquationText");
+
+          if (m.isFrictionActive) {
+            statusBar.classList.add("friction-mode");
+            statusTitle.textContent = "⚠️ Kitka mukana: Kitkavoiman voittaminen vaatii lisätyötä (lämpöhäviö)!";
+            effBadge.textContent = `Hyötysuhde η = ${fmt(m.efficiencyPct, 1)} %`;
+            eqText.textContent =
+              `W_käytetty (${fmt(m.inputWorkTarget, 0)} J) = W_nosto (${fmt(m.usefulWorkTarget, 0)} J) + W_kitka (${fmt(m.frictionWorkTarget, 0)} J)`;
+          } else {
+            statusBar.classList.remove("friction-mode");
+            statusTitle.textContent = "✅ Mekaniikan kultainen sääntö: Voimassa voitettu osuus hävitään matkassa!";
+            effBadge.textContent = "Hyötysuhde η = 100 % (Ihanteellinen kone)";
+            eqText.textContent =
+              `Voimasuhde G / F = ${fmt(m.forceRatio, 2)}  =  Matkasuhde s₂ / h₁ = ${fmt(m.mechanicalAdvantage, 2)}   ⇒   W_nosto = G · h₁ = F · s₂ = ${fmt(m.usefulWorkTarget, 0)} J`;
+          }
+        }
+
+        renderTable();
+      }
+
+      // Piirtää paksun, selkeän vektorinuolen ja sen tekstilaatikon
+      function drawVectorArrow(x1, y1, x2, y2, color, title, valText, posMode = "below") {
+        const headLen = 12;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 4.2;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        if (title) {
+          ctx.font = "bold 12px system-ui, sans-serif";
+          const w1 = ctx.measureText(title).width;
+          ctx.font = "bold 11px monospace";
+          const w2 = valText ? ctx.measureText(valText).width : 0;
+          const boxW = Math.max(w1, w2) + 14;
+          const boxH = valText ? 32 : 18;
+
+          let midX, midY;
+
+          if (posMode === "below" || posMode === "bottom") {
+            // Suoraan nuolenkärjen alapuolelle keskitettynä
+            midX = x2 - boxW / 2;
+            midY = y2 + 6;
+          } else if (posMode === "above" || posMode === "top") {
+            // Suoraan nuolenkärjen yläpuolelle keskitettynä
+            midX = x2 - boxW / 2;
+            midY = y2 - boxH - 6;
+          } else if (posMode === "right") {
+            midX = Math.max(x1, x2) + 10;
+            midY = (y1 + y2) / 2 - boxH / 2;
+          } else if (posMode === "left") {
+            midX = Math.min(x1, x2) - boxW - 10;
+            midY = (y1 + y2) / 2 - boxH / 2;
+          } else {
+            midX = x2 - boxW / 2;
+            midY = y2 >= y1 ? y2 + 6 : y2 - boxH - 6;
+          }
+
+          midX = Math.max(6, Math.min(canvas.width - boxW - 6, midX));
+          midY = Math.max(6, Math.min(canvas.height - boxH - 6, midY));
+
+          ctx.fillStyle = "rgba(15, 23, 42, 0.94)";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(midX, midY, boxW, boxH, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = color;
+          ctx.font = "bold 11.5px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(title, midX + boxW / 2, midY + 13);
+          if (valText) {
+            ctx.fillStyle = "#f8fafc";
+            ctx.font = "bold 11px monospace";
+            ctx.fillText(valText, midX + boxW / 2, midY + 27);
+          }
+        }
+        ctx.restore();
+      }
+
+      // Piirtää siirtymämitan (h1, s2, d1, d2)
+      function drawDimensionLine(x1, y1, x2, y2, color, text, offsetX = 0, offsetY = 0) {
+        if (Math.hypot(x2 - x1, y2 - y1) < 5) return;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.setLineDash([5, 4]);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const perpX = -Math.sin(angle) * 6;
+        const perpY = Math.cos(angle) * 6;
+        ctx.beginPath();
+        ctx.moveTo(x1 - perpX, y1 - perpY);
+        ctx.lineTo(x1 + perpX, y1 + perpY);
+        ctx.moveTo(x2 - perpX, y2 - perpY);
+        ctx.lineTo(x2 + perpX, y2 + perpY);
+        ctx.stroke();
+
+        ctx.font = "bold 11.5px monospace";
+        const tw = ctx.measureText(text).width + 12;
+        let mx = (x1 + x2) / 2 + offsetX - tw / 2;
+        let my = (y1 + y2) / 2 + offsetY - 10;
+        mx = Math.max(6, Math.min(canvas.width - tw - 6, mx));
+        my = Math.max(6, Math.min(canvas.height - 26, my));
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        ctx.fillRect(mx, my, tw, 20);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(mx, my, tw, 20);
+
+        ctx.fillStyle = color;
+        ctx.textAlign = "left";
+        ctx.fillText(text, mx + 6, my + 14);
+        ctx.restore();
+      }
+
+      // --- TILA 1: VIPUVARSI NOSTOKONEENA ---
+      function renderLeverScene(W, H, m) {
+        const groundFloorY = 408; // Alin maapohja (tekstilaatikot jäävät aina tämän yläpuolelle)
+
+        // Vipuvarren pituus pikseleinä ja tukipisteen X-koordinaatti
+        // Sijoitetaan vipu välille x = 275 ... 675, jolloin vasemmalle jää tilaa suoralle vertailunostolle ja h1-mitalle,
+        // ja oikealle jää reilusti tilaa s2-mitalle.
+        const totalArm = state.leverS1 + state.leverS2;
+        const beamPxLen = 390;
+        const leftLenPx = (state.leverS1 / totalArm) * beamPxLen;
+        const rightLenPx = (state.leverS2 / totalArm) * beamPxLen;
+        const pivotX = 275 + leftLenPx;
+        const pivotY = 228;
+
+        // Kulman maksimiarvo valitaan niin, että kumpikaan pää ei mene koskaan alle y = 300.
+        // Tällöin y = 300 alapuolella on 108 px vapaata tilaa ennen groundFloorY = 408:aa,
+        // joten 48 px nuoli + 32 px tekstilaatikko (yht. 86 px) eivät koskaan osu maahan eivätkä kuormaan!
+        const sinMax = Math.min(0.32, 70 / Math.max(leftLenPx, rightLenPx));
+
+        // Kun progress = 0: sinTheta = -sinMax (vasen kuormapää lepää alhaalla lähtötasolla h1 = 0 m, oikea pää sojottaa viistosti ylös)
+        // Kun progress = 1: sinTheta = +sinMax (oikea pää on painettu alas matkan s2, kuorma on noussut korkeudelle h1)
+        const sinT = sinMax * (2 * state.progress - 1);
+        const tiltRad = Math.asin(sinT);
+        const cosT = Math.cos(tiltRad);
+
+        // Lähtö- ja lopputasojen Y-koordinaatit
+        const leftStartY = pivotY + leftLenPx * sinMax;   // h1 = 0 m taso (progress = 0 %)
+        const leftEndY = pivotY - leftLenPx * sinMax;     // h1 = tavoitetaso (progress = 100 %)
+        const rightStartY = pivotY - rightLenPx * sinMax; // Oikean pään yläasento (progress = 0 %)
+        const rightEndY = pivotY + rightLenPx * sinMax;   // Oikean pään ala-asento (progress = 100 %)
+
+        // Nykyiset vivun päiden koordinaatit
+        const leftX = pivotX - leftLenPx * cosT;
+        const leftY = pivotY - leftLenPx * sinT;
+        const rightX = pivotX + rightLenPx * cosT;
+        const rightY = pivotY + rightLenPx * sinT;
+
+        // Alin maaperä
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(0, groundFloorY, W, H - groundFloorY);
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, groundFloorY);
+        ctx.lineTo(W, groundFloorY);
+        ctx.stroke();
+
+        // Noston lähtötason (h1 = 0 m) katkoviiva
+        ctx.save();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(32, leftStartY);
+        ctx.lineTo(pivotX - 28, leftStartY);
+        ctx.stroke();
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "bold 10.5px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("Maataso / lähtötaso (h₁ = 0 m)", 34, leftStartY + 14);
+        ctx.restore();
+
+        // --- 1. RINNAKKAINEN VERTAILU VASEMMALLA: ILMAN VIPUA (SUORA NOSTO) ---
+        const directX = 82;
+        const crateSize = 44;
+        const directCrateBotY = leftY;
+
+        ctx.save();
+        ctx.fillStyle = "rgba(15, 23, 42, 0.78)";
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(22, 92, 122, 42, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#93c5fd";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Ilman vipua:", directX, 108);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "bold 11px monospace";
+        ctx.fillText(`F_suora = ${fmt(m.G, 1)} N`, directX, 125);
+
+        // Haamulaatikko suorassa nostossa (nousee täsmälleen samalle korkeudelle kuin vivun kuorma)
+        ctx.fillStyle = "rgba(37, 99, 235, 0.25)";
+        ctx.strokeStyle = "#60a5fa";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(directX - crateSize / 2, directCrateBotY - crateSize - 4, crateSize, crateSize, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#bfdbfe";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.fillText(`${state.mass} kg`, directX, directCrateBotY - crateSize / 2 - 1);
+
+        // Suoran noston nostovoiman nuoli ylöspäin
+        drawVectorArrow(
+          directX,
+          directCrateBotY - crateSize - 6,
+          directX,
+          directCrateBotY - crateSize - 44,
+          "#60a5fa",
+          "F_suora = G",
+          `${fmt(m.G, 1)} N`,
+          "above"
+        );
+        ctx.restore();
+
+        // --- 2. TUKIPISTE JA VIPUVARSI ---
+        ctx.fillStyle = "#475569";
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY + 4);
+        ctx.lineTo(pivotX - 34, groundFloorY);
+        ctx.lineTo(pivotX + 34, groundFloorY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Tukipiste", pivotX, groundFloorY - 10);
+
+        // Alkutilanteen (0 %) himmeä haamuvipu, jotta oppilas näkee mistä liike lähti
+        if (state.progress > 0.03) {
+          const ghostAngle = Math.asin(-sinMax);
+          ctx.save();
+          ctx.translate(pivotX, pivotY);
+          ctx.rotate(ghostAngle);
+          ctx.setLineDash([5, 5]);
+          ctx.strokeStyle = "rgba(250, 204, 21, 0.32)";
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(-leftLenPx, 0);
+          ctx.lineTo(rightLenPx, 0);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Varsinainen vipupalkki
+        ctx.save();
+        ctx.translate(pivotX, pivotY);
+        ctx.rotate(tiltRad);
+
+        ctx.fillStyle = "#eab308";
+        ctx.strokeStyle = "#fef08a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-leftLenPx, -7, beamPxLen, 14, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // Metriasteikko tukipisteestä
+        const pxPerMeter = beamPxLen / totalArm;
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 1.5;
+        for (let d = 0.5; d <= state.leverS1 + 0.01; d += 0.5) {
+          const x = -d * pxPerMeter;
+          ctx.beginPath();
+          ctx.moveTo(x, -7);
+          ctx.lineTo(x, 1);
+          ctx.stroke();
+        }
+        for (let d = 0.5; d <= state.leverS2 + 0.01; d += 0.5) {
+          const x = d * pxPerMeter;
+          ctx.beginPath();
+          ctx.moveTo(x, -7);
+          ctx.lineTo(x, 1);
+          ctx.stroke();
+        }
+
+        // Vipuvarsien mitat s1 ja s2 palkin yläpuolella
+        ctx.font = "bold 11.5px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        const s1Label = leftLenPx > 125 ? `Kuorman varsi s₁ = ${fmt(state.leverS1, 2)} m` : `s₁ = ${fmt(state.leverS1, 2)} m`;
+        const s2Label = rightLenPx > 125 ? `Voiman varsi s₂ = ${fmt(state.leverS2, 2)} m` : `s₂ = ${fmt(state.leverS2, 2)} m`;
+
+        ctx.fillStyle = "#93c5fd";
+        ctx.fillText(s1Label, -leftLenPx * 0.5, -13);
+        ctx.fillStyle = "#fca5a5";
+        ctx.fillText(s2Label, rightLenPx * 0.5, -13);
+        ctx.restore();
+
+        // Tukipisteen nivelpultti
+        ctx.fillStyle = "#f8fafc";
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Kuormalaatikko vasemmassa päässä
+        ctx.fillStyle = "#2563eb";
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(leftX - crateSize / 2, leftY - crateSize - 5, crateSize, crateSize, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.mass} kg`, leftX, leftY - crateSize / 2 - 1);
+
+        // Oikean pään painalluskahva
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#fecaca";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(rightX, rightY, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // --- 3. VOIMAVEKTORIT G1 JA F2 SEKÄ SIIRTYMÄMITAT h1 JA s2 ---
+        if (state.showDims) {
+          const gLen = Math.min(54, Math.max(38, 32 + m.G * 0.025));
+          const fLen = Math.min(54, Math.max(36, 30 + m.F * 0.025));
+
+          // Kuorman paino G1: alkaa vivun kärjestä (kuorman alta) ja osoittaa suoraan alas.
+          // Tekstilaatikko on keskitetty nuolenkärjen alapuolelle ("below").
+          drawVectorArrow(leftX, leftY + 2, leftX, leftY + 2 + gLen, "#3b82f6", "Paino G₁", `${fmt(m.G, 1)} N`, "below");
+
+          // Käyttäjän painallusvoima F2: alkaa oikeasta kahvasta ja osoittaa suoraan alas.
+          // Tekstilaatikko on keskitetty nuolenkärjen alapuolelle ("below").
+          drawVectorArrow(rightX, rightY + 2, rightX, rightY + 2 + fLen, "#ef4444", "Voima F₂", `${fmt(m.F, 1)} N`, "below");
+
+          // Siirtymämitat h1 (vasemmalla, x = 205) ja s2 (oikealla, x = 742)
+          // Sijoitettu vaakasuunnassa selkeästi erilleen G1- ja F2-tekstilaatikoista!
+          const dimLeftX = 202;
+          const dimRightX = 742;
+
+          if (state.progress > 0.02) {
+            ctx.save();
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = "rgba(34, 197, 94, 0.45)";
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(leftX - crateSize / 2, leftY);
+            ctx.lineTo(dimLeftX, leftY);
+            ctx.moveTo(rightX, rightStartY);
+            ctx.lineTo(dimRightX, rightStartY);
+            ctx.moveTo(rightX, rightY);
+            ctx.lineTo(dimRightX, rightY);
+            ctx.stroke();
+            ctx.restore();
+
+            drawDimensionLine(dimLeftX, leftStartY, dimLeftX, leftY, "#22c55e", `h₁ = ${fmt(m.hNow, 2)} m`, -22, 0);
+            drawDimensionLine(dimRightX, rightStartY, dimRightX, rightY, "#22c55e", `s₂ = ${fmt(m.sNow, 2)} m`, 22, 0);
+          } else {
+            // Kun progress = 0 %, näytetään himmeä tavoitemitta
+            drawDimensionLine(dimLeftX, leftStartY, dimLeftX, leftEndY, "rgba(34, 197, 94, 0.55)", `Tavoite h₁ = ${fmt(m.hTarget, 2)} m`, -18, 0);
+            drawDimensionLine(dimRightX, rightStartY, dimRightX, rightEndY, "rgba(34, 197, 94, 0.55)", `Matka s₂ = ${fmt(m.sTarget, 2)} m`, 18, 0);
+          }
+        }
+
+        // --- 4. YLÄPALKIN VERTAILULAATIKKO: SUORA NOSTO VS. VIPUNOSTO ---
+        ctx.save();
+        ctx.fillStyle = "rgba(15, 23, 42, 0.90)";
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(18, 12, 804, 64, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#7dd3fc";
+        ctx.font = "bold 12px system-ui, sans-serif";
+        ctx.fillText("SUORAN NOSTON JA VIPUNOSTON VERTAILU (Mekaniikan kultainen sääntö):", 32, 31);
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "12px monospace";
+        ctx.fillText(
+          `• Ilman vipua (suora nosto): F_suora = G = ${fmt(m.G, 1)} N   |   • Vivulla: F₂ = G · (s₁/s₂) = ${fmt(m.F, 1)} N`,
+          32,
+          50
+        );
+        ctx.fillStyle = "#4ade80";
+        ctx.fillText(
+          `• Mekaniikan kultainen sääntö: W_nosto = G · h₁ = F₂ · s₂ = ${fmt(m.usefulWorkTarget, 0)} J (työn määrä säilyy vakiona!)`,
+          32,
+          67
+        );
+        ctx.restore();
+      }
+
+      // --- TILA 2: VÄKIPYÖRÄT JA TALJA ---
+      function renderPulleyScene(W, H, m) {
+        const ceilingY = 48;
+        const groundY = 398;
+        const hoistX = 300;
+
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(120, ceilingY - 18, 560, 18);
+        ctx.fillRect(0, groundY, W, H - groundY);
+
+        const maxVisualLiftPx = 140;
+        const startCrateBotY = groundY - 82;
+        const crateBotY = startCrateBotY - state.progress * maxVisualLiftPx;
+        const crateW = 64;
+        const crateH = 52;
+        const crateTopY = crateBotY - crateH;
+
+        if (state.showDims && state.progress > 0.02) {
+          drawDimensionLine(
+            hoistX - 92,
+            startCrateBotY,
+            hoistX - 92,
+            crateBotY,
+            "#22c55e",
+            `h₁ = ${fmt(m.hNow, 2)} m`,
+            -46,
+            0
+          );
+        }
+
+        const wheelAngle = state.progress * 6.5;
+
+        function drawPulleyWheel(cx, cy, radius, rot) {
+          ctx.save();
+          ctx.fillStyle = "#1e293b";
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 3; i++) {
+            const a = rot + (i * Math.PI) / 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(a) * (radius - 4), cy - Math.sin(a) * (radius - 4));
+            ctx.lineTo(cx + Math.cos(a) * (radius - 4), cy + Math.sin(a) * (radius - 4));
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = "#f8fafc";
+          ctx.beginPath();
+          ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        function drawRopeBadge(x, y, num) {
+          ctx.save();
+          ctx.fillStyle = "#16a34a";
+          ctx.strokeStyle = "#dcfce7";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 11px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(String(num), x, y + 4);
+          ctx.restore();
+        }
+
+        let pullHandleX = 500;
+        let pullHandleY = 180;
+        let pullStartY = 110;
+        let pullDir = 1;
+
+        ctx.strokeStyle = "#facc15";
+        ctx.lineWidth = 3.2;
+
+        if (state.pulleyType === "direct") {
+          pullDir = -1;
+          pullStartY = startCrateBotY - crateH - 45;
+          pullHandleX = hoistX;
+          pullHandleY = crateTopY - 45;
+
+          ctx.beginPath();
+          ctx.moveTo(hoistX, crateTopY);
+          ctx.lineTo(pullHandleX, pullHandleY);
+          ctx.stroke();
+          drawRopeBadge(hoistX, crateTopY - 22, 1);
+        } else if (state.pulleyType === "fixed") {
+          const wheelR = 24;
+          const wheelY = ceilingY + 34;
+          pullDir = 1;
+          pullStartY = 115;
+          pullHandleX = hoistX + wheelR + 110;
+          pullHandleY = pullStartY + state.progress * maxVisualLiftPx;
+
+          ctx.strokeStyle = "#94a3b8";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(hoistX, ceilingY);
+          ctx.lineTo(hoistX, wheelY);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#facc15";
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(hoistX - wheelR, crateTopY);
+          ctx.lineTo(hoistX - wheelR, wheelY);
+          ctx.arc(hoistX, wheelY, wheelR, Math.PI, -0.2, false);
+          ctx.lineTo(pullHandleX, wheelY);
+          ctx.lineTo(pullHandleX, pullHandleY);
+          ctx.stroke();
+
+          drawPulleyWheel(hoistX, wheelY, wheelR, wheelAngle);
+          drawPulleyWheel(pullHandleX, wheelY, 16, wheelAngle);
+          drawRopeBadge(hoistX - wheelR, (crateTopY + wheelY) / 2, 1);
+        } else if (state.pulleyType === "movable") {
+          const wheelR = 24;
+          const movWheelY = crateTopY - 26;
+          const fixWheelX = hoistX + 140;
+          const fixWheelY = ceilingY + 34;
+
+          pullDir = 1;
+          pullStartY = 100;
+          pullHandleX = fixWheelX + wheelR;
+          pullHandleY = pullStartY + state.progress * (maxVisualLiftPx * 1.35);
+
+          ctx.strokeStyle = "#94a3b8";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(hoistX - wheelR, ceilingY);
+          ctx.lineTo(hoistX - wheelR, ceilingY + 12);
+          ctx.moveTo(fixWheelX, ceilingY);
+          ctx.lineTo(fixWheelX, fixWheelY);
+          ctx.moveTo(hoistX, movWheelY);
+          ctx.lineTo(hoistX, crateTopY);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#facc15";
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(hoistX - wheelR, ceilingY + 10);
+          ctx.lineTo(hoistX - wheelR, movWheelY);
+          ctx.arc(hoistX, movWheelY, wheelR, Math.PI, 0, true);
+          ctx.lineTo(hoistX + wheelR, fixWheelY);
+          ctx.lineTo(fixWheelX, fixWheelY - wheelR);
+          ctx.lineTo(pullHandleX, fixWheelY);
+          ctx.lineTo(pullHandleX, pullHandleY);
+          ctx.stroke();
+
+          drawPulleyWheel(hoistX, movWheelY, wheelR, wheelAngle);
+          drawPulleyWheel(fixWheelX, fixWheelY, wheelR, wheelAngle * 2);
+
+          const midRopeY = (ceilingY + movWheelY) / 2;
+          drawRopeBadge(hoistX - wheelR, midRopeY, 1);
+          drawRopeBadge(hoistX + wheelR, midRopeY, 2);
+        } else if (state.pulleyType === "tackle4") {
+          const topBlockY = ceilingY + 34;
+          const botBlockY = crateTopY - 30;
+          const xOffsets = [-42, -14, 14, 42];
+          const guideX = hoistX + 185;
+
+          pullDir = 1;
+          pullStartY = 90;
+          pullHandleX = guideX;
+          pullHandleY = pullStartY + state.progress * (maxVisualLiftPx * 1.5);
+
+          ctx.fillStyle = "#475569";
+          ctx.strokeStyle = "#cbd5e1";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(hoistX - 56, ceilingY, 112, 48, 8);
+          ctx.roundRect(hoistX - 56, botBlockY - 16, 112, 36, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = "#94a3b8";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(hoistX, botBlockY + 20);
+          ctx.lineTo(hoistX, crateTopY);
+          ctx.moveTo(guideX, ceilingY);
+          ctx.lineTo(guideX, topBlockY);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#facc15";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          xOffsets.forEach((dx) => {
+            ctx.moveTo(hoistX + dx, topBlockY);
+            ctx.lineTo(hoistX + dx, botBlockY);
+          });
+          ctx.moveTo(hoistX + xOffsets[3], topBlockY);
+          ctx.lineTo(guideX, topBlockY);
+          ctx.lineTo(pullHandleX, pullHandleY);
+          ctx.stroke();
+
+          drawPulleyWheel(hoistX - 28, topBlockY, 14, wheelAngle * 2);
+          drawPulleyWheel(hoistX + 28, topBlockY, 14, wheelAngle * 4);
+          drawPulleyWheel(hoistX - 28, botBlockY, 14, wheelAngle);
+          drawPulleyWheel(hoistX + 28, botBlockY, 14, wheelAngle * 3);
+          drawPulleyWheel(guideX, topBlockY, 16, wheelAngle * 4);
+
+          const midY = (topBlockY + botBlockY) / 2;
+          xOffsets.forEach((dx, idx) => {
+            drawRopeBadge(hoistX + dx, midY, idx + 1);
+          });
+        }
+
+        // Kuormalaatikko
+        ctx.fillStyle = "#2563eb";
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(hoistX - crateW / 2, crateTopY, crateW, crateH, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 13px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.mass} kg`, hoistX, crateTopY + crateH / 2 + 5);
+
+        // Vetokahva
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#fecaca";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(pullHandleX - 18, pullHandleY - 9, 36, 18, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        if (state.showDims) {
+          const gLen = 42;
+          const fLen = 42;
+
+          drawVectorArrow(
+            hoistX,
+            crateBotY,
+            hoistX,
+            crateBotY + gLen,
+            "#3b82f6",
+            "Paino G",
+            `${fmt(m.G, 1)} N`,
+            "below"
+          );
+
+          drawVectorArrow(
+            pullHandleX,
+            pullHandleY,
+            pullHandleX,
+            pullHandleY + pullDir * fLen,
+            "#ef4444",
+            "Vetovoima F",
+            `${fmt(m.F, 1)} N`,
+            pullDir === 1 ? "below" : "above"
+          );
+
+          if (state.progress > 0.02 && state.pulleyType !== "direct") {
+            drawDimensionLine(
+              pullHandleX + 64,
+              pullStartY,
+              pullHandleX + 64,
+              pullHandleY,
+              "#22c55e",
+              `s = ${fmt(m.sNow, 2)} m`,
+              48,
+              0
+            );
+          }
+        }
+      }
+
+      // --- TILA 3: KALTEVA TASO ---
+      function renderInclineScene(W, H, m) {
+        const groundY = 365;
+        const rampStartX = 250;
+        const maxRampEndX = 755;
+        const maxHeightPx = 225;
+
+        const scalePxPerM = Math.min(
+          (maxRampEndX - rampStartX) / Math.max(3.5, state.rampLength),
+          maxHeightPx / Math.max(1.5, state.targetHeight)
+        );
+
+        const hPx = Math.max(55, state.targetHeight * scalePxPerM);
+        const lPx = Math.max(hPx + 35, state.rampLength * scalePxPerM);
+        const basePx = Math.sqrt(Math.max(900, lPx * lPx - hPx * hPx));
+
+        const rampTopX = rampStartX + basePx;
+        const rampTopY = groundY - hPx;
+        const angleRad = Math.atan2(hPx, basePx);
+        const angleDeg = (Math.asin(Math.min(1, state.targetHeight / state.rampLength)) * 180) / Math.PI;
+
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(0, groundY, W, H - groundY);
+
+        // Suora nosto vertailuna vasemmalla
+        const directX = 105;
+        ctx.save();
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(directX - 30, rampTopY);
+        ctx.lineTo(rampTopX, rampTopY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "bold 11.5px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Vertailu: Suora nosto", directX, 42);
+
+        const ghostY = groundY - state.progress * hPx;
+        ctx.fillStyle = "rgba(37, 99, 235, 0.28)";
+        ctx.strokeStyle = "#60a5fa";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(directX - 24, ghostY - 38, 48, 38, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        drawVectorArrow(
+          directX,
+          ghostY - 38,
+          directX,
+          ghostY - 82,
+          "#60a5fa",
+          "Suora F = G",
+          `${fmt(m.G, 1)} N`,
+          "above"
+        );
+        ctx.restore();
+
+        // Kaltevan tason kolmio
+        ctx.fillStyle = state.inclineFrictionOn ? "#3f2e21" : "#1e293b";
+        ctx.strokeStyle = state.inclineFrictionOn ? "#f97316" : "#64748b";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(rampStartX, groundY);
+        ctx.lineTo(rampTopX, groundY);
+        ctx.lineTo(rampTopX, rampTopY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Kulmakaari
+        ctx.save();
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(rampStartX, groundY, 48, -angleRad, 0);
+        ctx.stroke();
+        ctx.fillStyle = "#7dd3fc";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText(`α = ${fmt(angleDeg, 1)}°`, rampStartX + 54, groundY - 10);
+        ctx.restore();
+
+        // Kuormavaunun paikka luiskalla
+        const distPx = state.progress * lPx;
+        const cartX = rampStartX + distPx * Math.cos(angleRad);
+        const cartY = groundY - distPx * Math.sin(angleRad);
+
+        ctx.save();
+        ctx.translate(cartX, cartY);
+        ctx.rotate(-angleRad);
+
+        ctx.strokeStyle = "#facc15";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(26, -22);
+        ctx.lineTo(lPx - distPx + 18, -22);
+        ctx.stroke();
+
+        ctx.fillStyle = "#2563eb";
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(-26, -42, 52, 34, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        if (!state.inclineFrictionOn) {
+          ctx.fillStyle = "#e2e8f0";
+          ctx.beginPath();
+          ctx.arc(-14, -5, 5, 0, Math.PI * 2);
+          ctx.arc(14, -5, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.mass} kg`, 0, -21);
+        ctx.restore();
+
+        if (state.showDims) {
+          const gLen = 46;
+          const fLen = Math.max(38, 56 * (m.F / m.G));
+
+          drawVectorArrow(
+            cartX,
+            cartY - 10,
+            cartX,
+            cartY - 10 + gLen,
+            "#3b82f6",
+            "Paino G",
+            `${fmt(m.G, 1)} N`,
+            "below"
+          );
+
+          const fx = cartX + Math.cos(angleRad) * (28 + fLen);
+          const fy = cartY - 22 - Math.sin(angleRad) * (28 + fLen);
+          drawVectorArrow(
+            cartX + Math.cos(angleRad) * 20,
+            cartY - 22 - Math.sin(angleRad) * 20,
+            fx,
+            fy,
+            "#ef4444",
+            "Vetovoima F",
+            `${fmt(m.F, 1)} N`,
+            "above"
+          );
+
+          if (state.inclineFrictionOn) {
+            drawVectorArrow(
+              cartX - Math.cos(angleRad) * 20,
+              cartY - 8 + Math.sin(angleRad) * 20,
+              cartX - Math.cos(angleRad) * 62,
+              cartY - 8 + Math.sin(angleRad) * 62,
+              "#f97316",
+              "Kitka Fμ",
+              `${fmt(m.frictionForce, 1)} N`,
+              "left"
+            );
+          }
+
+          drawDimensionLine(
+            rampTopX + 28,
+            groundY,
+            rampTopX + 28,
+            rampTopY,
+            "#22c55e",
+            `h = ${fmt(state.targetHeight, 2)} m`,
+            48,
+            0
+          );
+
+          if (state.progress > 0.03) {
+            const nx = -Math.sin(angleRad) * 44;
+            const ny = -Math.cos(angleRad) * 44;
+            drawDimensionLine(
+              rampStartX + nx,
+              groundY + ny,
+              cartX + nx,
+              cartY + ny,
+              "#22c55e",
+              `s = ${fmt(m.sNow, 2)} m / L = ${fmt(state.rampLength, 1)} m`,
+              -20,
+              -16
+            );
+          }
+        }
+      }
+
+      // --- TILA 4: TASAPAINOLAUTA JA MOMENTIT ---
+      function renderBalanceScene(W, H) {
+        const b = computeBalance();
+        const groundY = 408;
+        const pivotX = W / 2; // 420
+        const pivotY = 225;
+        const pxPerMeter = 72; // 4 m = 288 px puolellaan (kokonaispituus 576 px)
+        const halfPlankPx = 4.25 * pxPerMeter;
+
+        // Maaperä
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(0, groundY, W, H - groundY);
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, groundY);
+        ctx.lineTo(W, groundY);
+        ctx.stroke();
+
+        // Vaakasuora vertailuviiva
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = b.isBalanced ? "rgba(74, 222, 128, 0.55)" : "rgba(148, 163, 184, 0.35)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(pivotX - halfPlankPx - 30, pivotY);
+        ctx.lineTo(pivotX + halfPlankPx + 30, pivotY);
+        ctx.stroke();
+        ctx.restore();
+
+        // Vihreä tasapainohehku tukipisteen ympärillä, kun M1 = M2
+        if (b.isBalanced) {
+          const glow = ctx.createRadialGradient(pivotX, pivotY, 12, pivotX, pivotY, 130);
+          glow.addColorStop(0, "rgba(34, 197, 94, 0.28)");
+          glow.addColorStop(1, "rgba(34, 197, 94, 0)");
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(pivotX, pivotY, 130, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Tukipisteen kolmio
+        ctx.fillStyle = "#475569";
+        ctx.strokeStyle = b.isBalanced ? "#4ade80" : "#94a3b8";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY + 6);
+        ctx.lineTo(pivotX - 38, groundY);
+        ctx.lineTo(pivotX + 38, groundY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "bold 11px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Tukipiste (0 m)", pivotX, groundY - 12);
+
+        const angle = state.balCurrentAngle;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+
+        // Piirretään symmetrinen tasapainolauta ja sen metripykälät (1 m, 2 m, 3 m, 4 m)
+        ctx.save();
+        ctx.translate(pivotX, pivotY);
+        ctx.rotate(angle);
+
+        ctx.fillStyle = b.isBalanced ? "#ca8a04" : "#eab308";
+        ctx.strokeStyle = b.isBalanced ? "#86efac" : "#fef08a";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.roundRect(-halfPlankPx, -8, halfPlankPx * 2, 16, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Metripykälät ja lukemat laudassa
+        for (let mStep = -4; mStep <= 4; mStep += 0.5) {
+          if (Math.abs(mStep) < 0.01) continue;
+          const x = mStep * pxPerMeter;
+          const isWholeMeter = Math.abs(mStep - Math.round(mStep)) < 0.01;
+
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = isWholeMeter ? 2.2 : 1.2;
+          ctx.beginPath();
+          ctx.moveTo(x, -8);
+          ctx.lineTo(x, isWholeMeter ? 4 : 0);
+          ctx.stroke();
+
+          if (isWholeMeter) {
+            // Pykäläkolmio yläpinnassa
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.arc(x, -8, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.font = "bold 10.5px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText(`${Math.abs(mStep)}m`, x, 21);
+          }
+        }
+
+        // Vasen punnus m1 laudan päällä
+        const x1Local = -b.d1 * pxPerMeter;
+        const w1Size = 42 + Math.min(18, b.m1 * 0.25);
+        ctx.fillStyle = "#2563eb";
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x1Local - w1Size / 2, -8 - w1Size, w1Size, w1Size, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12.5px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`m₁`, x1Local, -8 - w1Size / 2 - 5);
+        ctx.fillText(`${b.m1} kg`, x1Local, -8 - w1Size / 2 + 10);
+
+        // Oikea punnus m2 laudan päällä
+        const x2Local = b.d2 * pxPerMeter;
+        const w2Size = 42 + Math.min(18, b.m2 * 0.25);
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#fca5a5";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x2Local - w2Size / 2, -8 - w2Size, w2Size, w2Size, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12.5px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`m₂`, x2Local, -8 - w2Size / 2 - 5);
+        ctx.fillText(`${b.m2} kg`, x2Local, -8 - w2Size / 2 + 10);
+
+        ctx.restore();
+
+        // Tukipisteen keskipultti
+        ctx.fillStyle = b.isBalanced ? "#4ade80" : "#f8fafc";
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Maailmankoordinaatit punnusten kiinnityspisteille (vektoreita ja mittoja varten)
+        const p1WorldX = pivotX - b.d1 * pxPerMeter * cosA;
+        const p1WorldY = pivotY - b.d1 * pxPerMeter * sinA;
+        const p2WorldX = pivotX + b.d2 * pxPerMeter * cosA;
+        const p2WorldY = pivotY + b.d2 * pxPerMeter * sinA;
+
+        if (state.showDims) {
+          const g1Len = Math.min(60, Math.max(38, 30 + b.G1 * 0.05));
+          const g2Len = Math.min(60, Math.max(38, 30 + b.G2 * 0.05));
+
+          // Voimavektorit G1 ja G2 suoraan alaspäin ja tekstilaatikot nuolenkärkien alle
+          drawVectorArrow(
+            p1WorldX,
+            p1WorldY + 8,
+            p1WorldX,
+            p1WorldY + 8 + g1Len,
+            "#3b82f6",
+            "G₁ = m₁g",
+            `${fmt(b.G1, 1)} N`,
+            "below"
+          );
+
+          drawVectorArrow(
+            p2WorldX,
+            p2WorldY + 8,
+            p2WorldX,
+            p2WorldY + 8 + g2Len,
+            "#ef4444",
+            "G₂ = m₂g",
+            `${fmt(b.G2, 1)} N`,
+            "below"
+          );
+
+          // Etäisyysmitat d1 ja d2 yläpuolella
+          const dimY = 112;
+          drawDimensionLine(pivotX, dimY, p1WorldX, dimY, "#60a5fa", `d₁ = ${fmt(b.d1, 2)} m`, 0, -14);
+          drawDimensionLine(pivotX, dimY, p2WorldX, dimY, "#f87171", `d₂ = ${fmt(b.d2, 2)} m`, 0, -14);
+        }
+
+        // Yläpalkin visuaalinen tilakyltti (TASAPAINOSSA vs. KALLELLAAN)
+        ctx.save();
+        const bannerW = 640;
+        const bannerX = (W - bannerW) / 2;
+        ctx.fillStyle = b.isBalanced ? "rgba(20, 83, 45, 0.92)" : "rgba(69, 26, 3, 0.92)";
+        ctx.strokeStyle = b.isBalanced ? "#4ade80" : "#f59e0b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(bannerX, 14, bannerW, 64, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        if (b.isBalanced) {
+          ctx.fillStyle = "#4ade80";
+          ctx.font = "bold 16px system-ui, sans-serif";
+          ctx.fillText("✅ TASAPAINOSSA! (M₁ = M₂)", W / 2, 38);
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "bold 12.5px monospace";
+          ctx.fillText(
+            `M₁ = ${fmt(b.G1, 1)} N · ${fmt(b.d1, 2)} m = ${fmt(b.M1, 1)} Nm   |   M₂ = ${fmt(b.G2, 1)} N · ${fmt(b.d2, 2)} m = ${fmt(b.M2, 1)} Nm`,
+            W / 2,
+            61
+          );
+        } else {
+          ctx.fillStyle = "#fbbf24";
+          ctx.font = "bold 15px system-ui, sans-serif";
+          const dirStr = b.M1 > b.M2 ? "VASEMMALLE (M₁ > M₂)" : "OIKEALLE (M₂ > M₁)";
+          ctx.fillText(`⚠️ LAUTA KALLELLAAN ${dirStr} — Erotus ΔM = ${fmt(b.diffM, 1)} Nm`, W / 2, 38);
+          ctx.fillStyle = "#fde68a";
+          ctx.font = "12px monospace";
+          ctx.fillText(
+            `Vasen M₁ = ${fmt(b.M1, 1)} Nm (${fmt(b.prod1, 1)} kg·m)   ≠   Oikea M₂ = ${fmt(b.M2, 1)} Nm (${fmt(b.prod2, 1)} kg·m)`,
+            W / 2,
+            61
+          );
+        }
+        ctx.restore();
+      }
+
+      // Pääpiirtofunktio
+      function renderCanvas() {
+        const W = canvas.width;
+        const H = canvas.height;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, "#0f172a");
+        bg.addColorStop(1, "#1e293b");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.08)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, H);
+          ctx.stroke();
+        }
+        for (let y = 0; y < H; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(W, y);
+          ctx.stroke();
+        }
+
+        if (state.mode === "balance") {
+          renderBalanceScene(W, H);
+        } else {
+          const m = computeMechanics();
+          if (state.mode === "lever") {
+            renderLeverScene(W, H, m);
+          } else if (state.mode === "pulley") {
+            renderPulleyScene(W, H, m);
+          } else {
+            renderInclineScene(W, H, m);
+          }
+        }
+      }
+
+      // Tallentaa mittauspisteen aktiivisen tilan taulukkoon
+      function recordMeasurement() {
+        if (state.mode === "balance") {
+          const b = computeBalance();
+          state.measurementsBalance.push({
+            id: state.measurementsBalance.length + 1,
+            type: "Tasapainolauta",
+            m1: b.m1,
+            d1: b.d1,
+            M1: b.M1,
+            m2: b.m2,
+            d2: b.d2,
+            M2: b.M2,
+            status: b.isBalanced ? "Tasapainossa (M₁ = M₂)" : b.M1 > b.M2 ? "Kallellaan vasemmalle" : "Kallellaan oikealle"
+          });
+        } else {
+          const m = computeMechanics();
+          state.measurementsWork.push({
+            id: state.measurementsWork.length + 1,
+            type: m.machineName,
+            mass: state.mass,
+            G: m.G,
+            h: m.hTarget,
+            F: m.F,
+            s: m.sTarget,
+            W: m.inputWorkTarget
+          });
+        }
+        renderTable();
+      }
+
+      function renderTable() {
+        const thead = document.getElementById("tableHead");
+        const tbody = document.getElementById("tableBody");
+
+        if (state.mode === "balance") {
+          thead.innerHTML = `
+            <tr>
+              <th>#</th>
+              <th>Koneen tyyppi</th>
+              <th>Massa m₁ (kg)</th>
+              <th>Etäisyys d₁ (m)</th>
+              <th>Momentti M₁ (Nm)</th>
+              <th>Massa m₂ (kg)</th>
+              <th>Etäisyys d₂ (m)</th>
+              <th>Momentti M₂ (Nm)</th>
+              <th>Tila</th>
+            </tr>
+          `;
+
+          if (state.measurementsBalance.length === 0) {
+            tbody.innerHTML = `
+              <tr class="empty-row">
+                <td colspan="9">Ei tallennettuja tasapainomittauksia. Aseta massat ja napsauta "Tallenna mittauspiste taulukkoon".</td>
+              </tr>
+            `;
+            return;
+          }
+
+          tbody.innerHTML = state.measurementsBalance
+            .map(
+              (r) => `
+            <tr>
+              <td>${r.id}</td>
+              <td><strong>${r.type}</strong></td>
+              <td>${r.m1}</td>
+              <td>${fmt(r.d1, 2)}</td>
+              <td style="color:#1d4ed8; font-weight:700;">${fmt(r.M1, 1)}</td>
+              <td>${r.m2}</td>
+              <td>${fmt(r.d2, 2)}</td>
+              <td style="color:#b91c1c; font-weight:700;">${fmt(r.M2, 1)}</td>
+              <td style="color:${r.status.startsWith("Tasapainossa") ? "#15803d" : "#b45309"}; font-weight:800;">${r.status}</td>
+            </tr>
+          `
+            )
+            .join("");
+        } else {
+          thead.innerHTML = `
+            <tr>
+              <th>#</th>
+              <th>Koneen tyyppi</th>
+              <th>Kuorman massa m (kg)</th>
+              <th>Kuorman paino G (N)</th>
+              <th>Nostokorkeus h₁ (m)</th>
+              <th>Tarvittava voima F (N)</th>
+              <th>Vetomatka s₂ (m)</th>
+              <th>Tehty työ W (J)</th>
+            </tr>
+          `;
+
+          if (state.measurementsWork.length === 0) {
+            tbody.innerHTML = `
+              <tr class="empty-row">
+                <td colspan="8">Ei tallennettuja mittauspisteitä. Säädä konetta ja napsauta "Tallenna mittauspiste taulukkoon".</td>
+              </tr>
+            `;
+            return;
+          }
+
+          tbody.innerHTML = state.measurementsWork
+            .map(
+              (r) => `
+            <tr>
+              <td>${r.id}</td>
+              <td><strong>${r.type}</strong></td>
+              <td>${r.mass}</td>
+              <td style="color:#1d4ed8; font-weight:700;">${fmt(r.G, 1)}</td>
+              <td>${fmt(r.h, 2)}</td>
+              <td style="color:#b91c1c; font-weight:700;">${fmt(r.F, 1)}</td>
+              <td>${fmt(r.s, 2)}</td>
+              <td style="color:#15803d; font-weight:800;">${fmt(r.W, 0)}</td>
+            </tr>
+          `
+            )
+            .join("");
+        }
+      }
+
+      // Tapahtumakuuntelijat: Yläpalkin 4 tilavälilehteä
+      document.querySelectorAll(".mode-tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.mode = btn.dataset.mode;
+          state.animating = false;
+          document.querySelectorAll(".mode-tab-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          updateUI();
+        });
+      });
+
+      // Yhteiset säätimet (Tilat 1-3)
+      document.getElementById("rngMass").addEventListener("input", (e) => {
+        state.mass = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("rngHeight").addEventListener("input", (e) => {
+        state.targetHeight = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("chkShowDims").addEventListener("change", (e) => {
+        state.showDims = e.target.checked;
+      });
+
+      // Tila 1: Vipusäätimet
+      document.getElementById("rngLeverS1").addEventListener("input", (e) => {
+        state.leverS1 = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("rngLeverS2").addEventListener("input", (e) => {
+        state.leverS2 = Number(e.target.value);
+        updateUI();
+      });
+
+      // Tila 2: Taljan valintapainikkeet
+      document.querySelectorAll(".pulley-type-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.pulleyType = btn.dataset.ptype;
+          updateUI();
+        });
+      });
+
+      // Tila 3: Kaltevan tason säätimet
+      document.getElementById("rngRampLen").addEventListener("input", (e) => {
+        state.rampLength = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("chkInclineFriction").addEventListener("change", (e) => {
+        state.inclineFrictionOn = e.target.checked;
+        updateUI();
+      });
+
+      document.getElementById("rngMu").addEventListener("input", (e) => {
+        state.mu = Number(e.target.value);
+        updateUI();
+      });
+
+      // Tila 4: Tasapainolaudan säätimet ja apupainikkeet
+      document.getElementById("rngBalM1").addEventListener("input", (e) => {
+        state.balM1 = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("rngBalD1").addEventListener("input", (e) => {
+        state.balD1 = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("rngBalM2").addEventListener("input", (e) => {
+        state.balM2 = Number(e.target.value);
+        updateUI();
+      });
+
+      document.getElementById("rngBalD2").addEventListener("input", (e) => {
+        state.balD2 = Number(e.target.value);
+        updateUI();
+      });
+
+      // Ratkaise tasapaino: etäisyydellä d2 (tai jos ei mahdu 0,5..4,0 m, säädetään myös m2)
+      document.getElementById("btnSolveBalDist").addEventListener("click", () => {
+        const targetProd = state.balM1 * state.balD1;
+        let idealD2 = targetProd / state.balM2;
+        if (idealD2 >= 0.5 && idealD2 <= 4.0) {
+          state.balD2 = Number(idealD2.toFixed(2));
+        } else {
+          state.balD2 = idealD2 > 4.0 ? 4.0 : 1.0;
+          state.balM2 = Math.max(1, Math.min(50, Math.round(targetProd / state.balD2)));
+          state.balD2 = Number((targetProd / state.balM2).toFixed(2));
+        }
+        updateUI();
+      });
+
+      // Ratkaise tasapaino: massalla m2
+      document.getElementById("btnSolveBalMass").addEventListener("click", () => {
+        const targetProd = state.balM1 * state.balD1;
+        let idealM2 = Math.round(targetProd / state.balD2);
+        if (idealM2 >= 1 && idealM2 <= 50 && Math.abs(idealM2 * state.balD2 - targetProd) < 0.05) {
+          state.balM2 = idealM2;
+        } else {
+          state.balM2 = Math.max(1, Math.min(50, idealM2));
+          state.balD2 = Number(Math.max(0.5, Math.min(4.0, targetProd / state.balM2)).toFixed(2));
+        }
+        updateUI();
+      });
+
+      // Tasapainolaudan esimerkkipainikkeet
+      document.querySelectorAll(".bal-preset-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.balM1 = Number(btn.dataset.m1);
+          state.balD1 = Number(btn.dataset.d1);
+          state.balM2 = Number(btn.dataset.m2);
+          state.balD2 = Number(btn.dataset.d2);
+          updateUI();
+        });
+      });
+
+      // Nostosäädin ja painikkeet (Tilat 1-3)
+      document.getElementById("rngProgress").addEventListener("input", (e) => {
+        state.animating = false;
+        state.progress = Number(e.target.value) / 100;
+        updateUI();
+      });
+
+      document.getElementById("btnAutoLift").addEventListener("click", () => {
+        if (state.progress >= 0.99) {
+          state.progress = 0;
+        }
+        state.animating = true;
+      });
+
+      document.getElementById("btnResetDown").addEventListener("click", () => {
+        state.animating = false;
+        state.progress = 0;
+        updateUI();
+      });
+
+      document.getElementById("btnRecord").addEventListener("click", recordMeasurement);
+
+      // Suora hiiri- ja kosketusraahaus kankaalla
+      canvas.addEventListener("pointerdown", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const canvasX = (e.clientX - rect.left) * scaleX;
+
+        state.dragging = true;
+        state.animating = false;
+        state.dragStartY = e.clientY;
+        state.dragStartX = e.clientX;
+        state.dragStartProgress = state.progress;
+
+        if (state.mode === "balance") {
+          const pivotX = canvas.width / 2;
+          state.dragTarget = canvasX < pivotX ? "balLeft" : "balRight";
+          updateBalanceDragPosition(canvasX);
+        } else {
+          state.dragTarget = "progress";
+        }
+
+        canvas.setPointerCapture(e.pointerId);
+      });
+
+      function updateBalanceDragPosition(canvasX) {
+        const pivotX = canvas.width / 2;
+        const pxPerMeter = 72;
+        if (state.dragTarget === "balLeft") {
+          const rawDist = (pivotX - canvasX) / pxPerMeter;
+          const snapped = Math.round(rawDist * 4) / 4; // 0,25 m pykälät
+          state.balD1 = Math.max(0.5, Math.min(4.0, snapped));
+        } else if (state.dragTarget === "balRight") {
+          const rawDist = (canvasX - pivotX) / pxPerMeter;
+          const snapped = Math.round(rawDist * 4) / 4;
+          state.balD2 = Math.max(0.5, Math.min(4.0, snapped));
+        }
+        updateUI();
+      }
+
+      canvas.addEventListener("pointermove", (e) => {
+        if (!state.dragging) return;
+
+        if (state.mode === "balance") {
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const canvasX = (e.clientX - rect.left) * scaleX;
+          updateBalanceDragPosition(canvasX);
+          return;
+        }
+
+        const dy = e.clientY - state.dragStartY;
+        const dx = e.clientX - state.dragStartX;
+
+        let delta = 0;
+        if (state.mode === "incline") {
+          delta = (dx - dy) / 220;
+        } else if (state.mode === "pulley" && state.pulleyType === "direct") {
+          delta = -dy / 160;
+        } else {
+          // Vivussa ja taljassa alaspäin painaminen/vetäminen nostaa kuormaa (progress 0 -> 1)
+          delta = dy / 160;
+        }
+
+        state.progress = Math.max(0, Math.min(1, state.dragStartProgress + delta));
+        updateUI();
+      });
+
+      canvas.addEventListener("pointerup", () => {
+        state.dragging = false;
+        state.dragTarget = null;
+      });
+
+      // Taulukon tyhjennys ja kopiointi
+      document.getElementById("btnClearTable").addEventListener("click", () => {
+        if (state.mode === "balance") {
+          state.measurementsBalance = [];
+        } else {
+          state.measurementsWork = [];
+        }
+        renderTable();
+      });
+
+      document.getElementById("btnCopyTable").addEventListener("click", () => {
+        let textToCopy = "";
+        if (state.mode === "balance") {
+          if (state.measurementsBalance.length === 0) return;
+          const header = "Koneen tyyppi\tMassa m1 (kg)\tEtaisyys d1 (m)\tMomentti M1 (Nm)\tMassa m2 (kg)\tEtaisyys d2 (m)\tMomentti M2 (Nm)\tTila";
+          const rows = state.measurementsBalance.map((r) =>
+            [r.type, r.m1, fmt(r.d1, 2), fmt(r.M1, 1), r.m2, fmt(r.d2, 2), fmt(r.M2, 1), r.status].join("\t")
+          );
+          textToCopy = [header, ...rows].join("\n");
+        } else {
+          if (state.measurementsWork.length === 0) return;
+          const header =
+            "Koneen tyyppi\tKuorman massa m (kg)\tKuorman paino G (N)\tNostokorkeus h1 (m)\tTarvittava voima F (N)\tVetomatka s2 (m)\tTehty tyo W (J)";
+          const rows = state.measurementsWork.map((r) =>
+            [r.type, r.mass, fmt(r.G, 1), fmt(r.h, 2), fmt(r.F, 1), fmt(r.s, 2), fmt(r.W, 0)].join("\t")
+          );
+          textToCopy = [header, ...rows].join("\n");
+        }
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const toast = document.getElementById("copyToast");
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2200);
+        });
+      });
+
+      // Animaatiosilmukka
+      function animate(now) {
+        if (!state.lastTime) state.lastTime = now;
+        const dt = Math.min(0.05, (now - state.lastTime) / 1000);
+        state.lastTime = now;
+
+        if (state.animating && state.mode !== "balance") {
+          state.progress += dt * 0.45;
+          if (state.progress >= 1) {
+            state.progress = 1;
+            state.animating = false;
+          }
+          updateUI();
+        }
+
+        // Tasapainolaudan pehmeä kallistusanimaatio kohti tasapaino- tai rajoitinkulmaa
+        if (state.mode === "balance") {
+          const b = computeBalance();
+          const diff = b.targetAngle - state.balCurrentAngle;
+          state.balCurrentAngle += diff * Math.min(1, dt * 8.5);
+        }
+
+        renderCanvas();
+        requestAnimationFrame(animate);
+      }
+
+      // Alustus
+      updateUI();
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
