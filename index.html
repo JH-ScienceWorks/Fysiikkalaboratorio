@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <title>Fysiikkalaboratorio</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #203047;
+    }
+
+    header {
+      background: #142b49;
+      color: white;
+      text-align: center;
+      padding: 55px 20px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 45px auto;
+      padding: 0 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px #00000012;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #1565a8;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: #1565a8;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .button:hover {
+      background: #0c4677;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #667;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Fysiikkalaboratorio</h1>
+  <p>Tutki, kokeile ja oivalla fysiikkaa!</p>
+</header>
+
+<main>
+  <h2>Interaktiiviset simulaatiot</h2>
+
+  <div class="cards">
+
+    <div class="card">
+      <h2>⚡ Energian muuttuminen</h2>
+      <p>
+        Tutki energian säilymistä
+        ja muuttumista muodosta toiseen.
+      </p>
+      <a class="button"
+         href="energia.html">
+         Avaa simulaatio
+      </a>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Työ, teho ja hyötysuhde</h2>
+      <p>
+        Tutki mekaanista työtä,
+        tehoa ja hyötysuhdetta.
+      </p>
+      <a class="button"
+         href="mekaaninen_työ_teho_hyötysuhde_1.1.html">
+         Avaa simulaatio
+      </a>
+    </div>
+
+    <div class="card">
+      <h2>🔧 Yksinkertaiset koneet</h2>
+      <p>
+        Tutustu vipuihin ja muihin
+        yksinkertaisiin koneisiin.
+      </p>
+      <a class="button"
+         href="yksinkertaiset_koneet_1.2.html">
+         Avaa simulaatio
+      </a>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Fysiikkalaboratorio – oppimista kokeilemalla
+</footer>
+
+</body>
+</html>
